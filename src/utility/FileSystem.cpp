@@ -24,6 +24,11 @@
 #endif
 
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_FAILURE_USERMSG 
+#include "thirdparty/stb_image.h"
+
+
 namespace nhahn
 {
 	std::string FileSystem::_cachedModulePath;
@@ -101,6 +106,17 @@ namespace nhahn
 		fseek(fp, prev, SEEK_SET);
 
 		return size;
+	}
+
+	bool FileSystem::loadImageFile(const char* filepath, unsigned char* data,
+		int* w, int* h, int* channels, int desired_channels = 0)
+	{
+		data = stbi_load(filepath, w, h, channels, desired_channels);
+		if (data != NULL) {
+			FAIL("Unable to load image '%s', Error: %s\n", filepath, stbi_failure_reason());
+			return false;
+		}
+		return true;
 	}
 }
 

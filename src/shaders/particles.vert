@@ -15,5 +15,5 @@ void main()
 	
 	float dist = length(eyePos.xyz);
 	float att = inversesqrt(0.1f*dist);
-	gl_PointSize = 0.5f * att;
+	gl_PointSize = 0.4f * att;
 }

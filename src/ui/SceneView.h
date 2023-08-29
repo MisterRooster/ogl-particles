@@ -42,7 +42,7 @@ namespace nhahn
         glm::vec2 _screenSize;
 
         std::unique_ptr<Shader> _particleProg;
-        //std::unique_ptr<Texture> _particleTex;
+        std::unique_ptr<Texture> _particleTex;
         std::shared_ptr<IEffect> _tunnelEffect;
         std::shared_ptr<IEffect> _attractorEffect;
         std::shared_ptr<IEffect> _fountainEffect;

@@ -1,4 +1,4 @@
-//uniform sampler2D tex;
+uniform sampler2D tex;
 
 in vec4 outColor;
 

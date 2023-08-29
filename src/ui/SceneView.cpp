@@ -63,7 +63,15 @@ namespace nhahn
         _screen->copy(data);
         delete[] data;
 
-        // particles
+        // particle texture
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data/particle.png";
+        unsigned char* textureData;
+        int textureW, textureH, textureChannels;
+        FileSystem::loadImageFile(texturePath.c_str(), textureData, &textureW, &textureH, &textureChannels, 0);
+
+        _particleTex = std::make_unique<Texture>(TEXTURE_2D, textureW, textureH);
+
+        // particle efects
         _tunnelEffect = EffectFactory::create("tunnel");
         _tunnelEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
         _tunnelEffect->initializeRenderer("gl");
@@ -139,9 +147,11 @@ namespace nhahn
         _currentEffect->cpuUpdate(dt);
         _currentEffect->gpuUpdate(dt);
 
+        _particleTex->bindAny();
         _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
-        //glEnable(GL_PROGRAM_POINT_SIZE);
+        glEnable(GL_PROGRAM_POINT_SIZE);
         _particleProg->bind();
+        _particleProg->setUniformI("tex", _particleTex->boundUnit());
         _particleProg->setUniformMat("modelViewMat", _camMV, false);
         _particleProg->setUniformMat("projectionMat", projMat, false);
         glEnable(GL_BLEND);
