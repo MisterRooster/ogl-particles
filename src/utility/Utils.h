@@ -23,6 +23,11 @@ namespace nhahn
 		static float frand();
 		static int irand();
 
+		template <typename T>
+		static int sgn(T val) {
+			return (T(0) < val) - (val < T(0));
+		}
+
 		static float smoothStep(float edge0, float edge1, float x);
 		static int stringHash(const char* str);
 
