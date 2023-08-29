@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "imgui.h"
+#include "utility/Debug.h"
 
 
 namespace nhahn
@@ -24,6 +25,12 @@ namespace nhahn
         _effectMap[name] = eff;
         if (_currEffKey.empty())
             _currEffKey = name;
+    }
+
+    void PropertyPanel::setEffectSwitchedCallback(std::function<void(std::shared_ptr<IEffect>)> func)
+    {
+        _effectSwitchedCB = func;
+        DBG("PropertyPanel", DebugLevel::DEBUG, "changes onEffectSwitch callback");
     }
 
     void PropertyPanel::render()
@@ -48,7 +55,11 @@ namespace nhahn
                 {
                     bool is_selected = (_currEffKey == key);
                     if (ImGui::Selectable(key.c_str(), is_selected))
+                    {
                         _currEffKey = key;
+                        if (_effectSwitchedCB)
+                            _effectSwitchedCB(_effectMap[_currEffKey]);
+                    }
                     if (is_selected)
                         ImGui::SetItemDefaultFocus();
                 }

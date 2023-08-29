@@ -9,6 +9,7 @@
 
 #include <map>
 #include <string>
+#include <functional>
 #include "glm/glm.hpp"
 #include "particles/Effect.h"
 
@@ -27,14 +28,13 @@ namespace nhahn
         void render();
 
         void addEffect(std::string name, std::shared_ptr<IEffect> eff);
+        void setEffectSwitchedCallback(std::function<void(std::shared_ptr<IEffect>)> func);
 
     protected:
         MapOfEffects _effectMap;
         std::string _currEffKey;
 
     private:
-        glm::vec3 _color = { 1.0f, 0.0f, 0.0f };
-        float _roughness = 0.2f;
-        float _metallic = 0.1f;
+        std::function<void(std::shared_ptr<IEffect>)> _effectSwitchedCB = {};
     };
 }

@@ -69,6 +69,11 @@ int main()
 		propertyPanel->addEffect("Fountain", _fountainEffect);
 		propertyPanel->addEffect("Tunnel", _tunnelEffect);
 
+		// notify scene view when settings change
+		propertyPanel->setEffectSwitchedCallback([](std::shared_ptr<IEffect> eff) {
+			sceneView->setEffect(eff.get());
+		});
+
 		// run main loop
 		app.run();
 
