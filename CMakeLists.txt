@@ -64,6 +64,10 @@ endif()
 # External libraries
 #######################################
 
+## OpenGL
+find_package(OpenGL REQUIRED)
+FindGLEW(GLEW_USE_STATIC_LIBS)
+
 # Download all submodules
 find_package(Git QUIT)
 if (GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -85,10 +89,10 @@ if (NOT EXISTS "${PROJECT_SOURCE_DIR}/dependencies/glfw/CMakeLists.txt")
 	message(FATAL_ERROR "The glfw submodule was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
-## OpenGL
-find_package(OpenGL REQUIRED)
-#find_package(glfw3 REQUIRED)
-#find_package(GLEW REQUIRED)
+if (NOT GLEW_FOUND)
+	message(FATAL_ERROR "The glew submodule was not found! Please install glew on your machine and try again.")
+endif()
+
 
 # GLFW
 set( GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE )
@@ -100,15 +104,14 @@ set( GLFW_INSTALL OFF CACHE BOOL "" FORCE )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glfw )
 
 ## Put all libraries into a variable
-#set(APP_LIBS glfw3 ${OPENGL_LIBRARY} GLEW::glew ${CMAKE_DL_LIBS})
-set(APP_LIBS glfw3 ${OPENGL_LIBRARY} glew32s ${CMAKE_DL_LIBS})
+set(APP_LIBS glfw3 ${OPENGL_LIBRARY} ${GLEW_STATIC_LIBRARIES} ${CMAKE_DL_LIBS})
 
 # Define the include DIRs
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "${CMAKE_SOURCE_DIR}/src"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glew/include"
+	PUBLIC ${GLEW_INCLUDE_DIRS}
 	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glm/include"
+	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glm"
 	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/imgui"
 )
 
