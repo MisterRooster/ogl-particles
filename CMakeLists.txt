@@ -12,12 +12,6 @@ else()
 	set(APP_BUILD_TYPE "Release")
 endif()
 
-# Add .lib files
-link_directories(
-	"${CMAKE_SOURCE_DIR}/dependencies/glew/lib"
-	"${CMAKE_SOURCE_DIR}/dependencies/glfw/lib"
-)
-
 # Find source files
 file(GLOB_RECURSE APP_SOURCE_FILES 
 	${CMAKE_SOURCE_DIR}/src/*.c
@@ -67,22 +61,55 @@ endif()
 #endif()
 
 #######################################
-# External libraries! 				  #
+# External libraries
 #######################################
+
+# Download all submodules
+find_package(Git QUIT)
+if (GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+	# Update submodules as needed
+	option(GIT_SUBMODULE "Check submodules during build" ON)
+	if (GIT_SUBMODULE)
+		message(STATUS "Submodule update")
+		execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+										WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+										RESULT_VARIABLE GIT_SUBMOD_RESULT)
+		if (NOT GIT_SUBMOD_RESULT EQUAL "0")
+			message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+		endif()
+	endif()
+endif()
+
+# Check all the submodules
+if (NOT EXISTS "${PROJECT_SOURCE_DIR}/dependencies/glfw/CMakeLists.txt")
+	message(FATAL_ERROR "The glfw submodule was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
 
 ## OpenGL
 find_package(OpenGL REQUIRED)
+#find_package(glfw3 REQUIRED)
+#find_package(GLEW REQUIRED)
+
+# GLFW
+set( GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE )
+set( GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE )
+set( GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE )
+set( GLFW_INSTALL OFF CACHE BOOL "" FORCE )
+
+#add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/GLEW/build/cmake )
+add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glfw )
 
 ## Put all libraries into a variable
+#set(APP_LIBS glfw3 ${OPENGL_LIBRARY} GLEW::glew ${CMAKE_DL_LIBS})
 set(APP_LIBS glfw3 ${OPENGL_LIBRARY} glew32s ${CMAKE_DL_LIBS})
 
 # Define the include DIRs
-include_directories(
-	"${CMAKE_SOURCE_DIR}/src"
-	"${CMAKE_SOURCE_DIR}/dependencies/glew/include"
-	"${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
-	"${CMAKE_SOURCE_DIR}/dependencies/glm/include"
-	"${CMAKE_SOURCE_DIR}/dependencies/imgui"
+target_include_directories(${PROJECT_NAME}
+	PRIVATE "${CMAKE_SOURCE_DIR}/src"
+	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glew/include"
+	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
+	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glm/include"
+	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/imgui"
 )
 
 # Define the link libraries

@@ -15,7 +15,7 @@ A recent GPU with fresh drivers is necessary to run this application. Support fo
 ## How to Compile
 Clone the repo:
 ```bash
-git clone --recursive git://github.com/MisterRooster/ogl-particles.git
+git clone git://github.com/MisterRooster/ogl-particles.git
 cd ogl-particles 
 ```
 
