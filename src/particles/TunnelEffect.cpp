@@ -7,7 +7,10 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "TunnelEffect.h"
 
+#include <string>
+#include "imgui.h"
 #include "utility/Debug.h"
+#include "utility/Utils.h"
 
 
 namespace nhahn
@@ -80,16 +83,6 @@ namespace nhahn
 		if (m_renderer) m_renderer->destroy();
 	}
 
-	/*/
-	void TunnelEffect::addUI()
-	{
-		ui::AddTweakColor4f("start col min", &m_colGenerator->m_minStartCol.x, "group=effect");
-		ui::AddTweakColor4f("start col max", &m_colGenerator->m_maxStartCol.x, "group=effect");
-		ui::AddTweakColor4f("end col min", &m_colGenerator->m_minEndCol.x, "group=effect");
-		ui::AddTweakColor4f("end col max", &m_colGenerator->m_maxEndCol.x, "group=effect");
-	}
-	//*/
-
 	void TunnelEffect::update(double dt)
 	{
 		static double time = 0.0;
@@ -118,6 +111,25 @@ namespace nhahn
 
 	void TunnelEffect::renderUI()
 	{
-		
+		ImGui::NewLine();
+		ImGui::TextWrapped(
+			"Fountain effect where the particles are affected by gravity, collide and bounces of the floor plane."
+		);
+		ImGui::Spacing();
+		ImGui::NewLine();
+
+		ImGui::SeparatorText("Colors:");
+
+		ImGui::ColorEdit4("start color min", &m_colGenerator->m_minStartCol.x);
+		ImGui::SameLine(); Utils::UIHelpMarker(
+			"Click on the color square to open a color picker.\n"
+			"Click and hold to use drag and drop.\n"
+			"Right-click on the color square to show options.\n"
+			"CTRL+click on individual component to input value.\n");
+
+		ImGui::ColorEdit4("start color max", &m_colGenerator->m_maxStartCol.x);
+
+		ImGui::ColorEdit4("end color min", &m_colGenerator->m_minEndCol.x);
+		ImGui::ColorEdit4("end color max", &m_colGenerator->m_maxEndCol.x);
 	}
 }

@@ -10,22 +10,11 @@
 #include <string>
 #include "imgui.h"
 #include "utility/Debug.h"
+#include "utility/Utils.h"
 
 
 namespace nhahn
 {
-	void HelpMarker(const char* desc)
-	{
-		ImGui::TextDisabled("(?)");
-		if (ImGui::BeginItemTooltip())
-		{
-			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(desc);
-			ImGui::PopTextWrapPos();
-			ImGui::EndTooltip();
-		}
-	}
-
 	bool AttractorEffect::initialize(size_t numParticles)
 	{
 		const size_t NUM_PARTICLES = numParticles == 0 ? IEffect::DEFAULT_PARTICLE_COUNT : numParticles;
@@ -178,12 +167,12 @@ namespace nhahn
 		ImGui::SeparatorText("Settings:");
 
 		ImGui::SliderFloat("z scale", &m_zScale, 0.0f, 1.0f);
-		ImGui::SameLine(); HelpMarker("CTRL+click to input value.");
+		ImGui::SameLine(); Utils::UIHelpMarker("CTRL+click to input value.");
 
 		ImGui::SeparatorText("Colors:");
 
 		ImGui::ColorEdit4("start color min", &m_colGenerator->m_minStartCol.x);
-		ImGui::SameLine(); HelpMarker(
+		ImGui::SameLine(); Utils::UIHelpMarker(
 			"Click on the color square to open a color picker.\n"
 			"Click and hold to use drag and drop.\n"
 			"Right-click on the color square to show options.\n"
