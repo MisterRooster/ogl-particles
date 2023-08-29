@@ -108,15 +108,15 @@ namespace nhahn
 		return size;
 	}
 
-	bool FileSystem::loadImageFile(const char* filepath, unsigned char* data,
-		int* w, int* h, int* channels, int desired_channels = 0)
+	unsigned char* FileSystem::loadImageFile(const char* filepath, int* w, int* h,
+		int* channels, int desired_channels = 0)
 	{
-		data = stbi_load(filepath, w, h, channels, desired_channels);
-		if (data != NULL) {
+		unsigned char* texData = stbi_load(filepath, w, h, channels, desired_channels);
+		if (texData == NULL) {
 			FAIL("Unable to load image '%s', Error: %s\n", filepath, stbi_failure_reason());
-			return false;
+			return NULL;
 		}
-		return true;
+		return texData;
 	}
 }
 

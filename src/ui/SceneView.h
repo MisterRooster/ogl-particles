@@ -29,6 +29,8 @@ namespace nhahn
 
         void render(double dt);
 
+        void setEffect(IEffect* effect) { _currentEffect = effect; }
+
     private:
         int _currentFPS = 0;
         glm::mat4 _camMV;
@@ -43,11 +45,7 @@ namespace nhahn
 
         std::unique_ptr<Shader> _particleProg;
         std::unique_ptr<Texture> _particleTex;
-        std::shared_ptr<IEffect> _tunnelEffect;
-        std::shared_ptr<IEffect> _attractorEffect;
-        std::shared_ptr<IEffect> _fountainEffect;
 
         IEffect* _currentEffect = nullptr;
-        int _currentEffectID = 0;
     };
 }

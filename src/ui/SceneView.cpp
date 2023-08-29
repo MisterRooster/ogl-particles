@@ -11,7 +11,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "render/BufferObject.h"
 #include "particles/ParticleRenderer.h"
-#include "particles/ParticleSystem.h"
 #include "particles/Effect.h"
 #include "utility/FileSystem.h"
 #include "utility/Debug.h"
@@ -23,7 +22,7 @@ namespace nhahn
         : _srcD(t), _screenSize(400, 225)
     {
         _srcSize = glm::vec2(t->width(), t->height());
-        std::string path = nhahn::FileSystem::getModuleDirectory() + "shaders/";
+        std::string path = nhahn::FileSystem::getModuleDirectory() + "data/shaders/";
 
         // global gl stats
         glEnable(GL_DEPTH_TEST);
@@ -65,27 +64,15 @@ namespace nhahn
 
         // particle texture
         std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data/particle.png";
-        unsigned char* textureData;
+        
         int textureW, textureH, textureChannels;
-        FileSystem::loadImageFile(texturePath.c_str(), textureData, &textureW, &textureH, &textureChannels, 0);
+        unsigned char* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 0);
 
         _particleTex = std::make_unique<Texture>(TEXTURE_2D, textureW, textureH);
+        _particleTex->copy(textureData);
+        delete[] textureData;
 
-        // particle efects
-        _tunnelEffect = EffectFactory::create("tunnel");
-        _tunnelEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
-        _tunnelEffect->initializeRenderer("gl");
-    
-        _attractorEffect = EffectFactory::create("attractors");
-        _attractorEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
-        _attractorEffect->initializeRenderer("gl");
-
-        _fountainEffect = EffectFactory::create("fountain");
-        _fountainEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
-        _fountainEffect->initializeRenderer("gl");
-
-        _currentEffectID = 0;
-        _currentEffect = _attractorEffect.get();
+        _currentEffect = nullptr;
 
         DBG("SceneView", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
     }
@@ -95,12 +82,8 @@ namespace nhahn
         _screen.reset();
         _quadProg.reset();
         _particleProg.reset();
+        _particleTex.reset();
 
-        _tunnelEffect->clean();
-        _fountainEffect->clean();
-        _attractorEffect->clean();
-
-        //glDeleteTextures(1, &_particleTex);
         _rt.reset();
     }
 
@@ -143,22 +126,25 @@ namespace nhahn
         _quadProg->unbind();
 
         // render particles to screen texture
-        _currentEffect->update(dt);
-        _currentEffect->cpuUpdate(dt);
-        _currentEffect->gpuUpdate(dt);
+        if (_currentEffect)
+        {
+            _currentEffect->update(dt);
+            _currentEffect->cpuUpdate(dt);
+            _currentEffect->gpuUpdate(dt);
 
-        _particleTex->bindAny();
-        _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        _particleProg->bind();
-        _particleProg->setUniformI("tex", _particleTex->boundUnit());
-        _particleProg->setUniformMat("modelViewMat", _camMV, false);
-        _particleProg->setUniformMat("projectionMat", projMat, false);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        _currentEffect->render();
-        glDisable(GL_BLEND);
-        _particleProg->unbind();        
+            _particleTex->bindAny();
+            _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            _particleProg->bind();
+            _particleProg->setUniformI("tex", _particleTex->boundUnit());
+            _particleProg->setUniformMat("modelViewMat", _camMV, false);
+            _particleProg->setUniformMat("projectionMat", projMat, false);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            _currentEffect->render();
+            glDisable(GL_BLEND);
+            _particleProg->unbind();
+        }  
         _rt->popViewport();
         _rt->unbind();
 
@@ -172,7 +158,7 @@ namespace nhahn
         {
             ImVec2 newPos;
             char btnLabel[64];
-            snprintf(btnLabel, sizeof btnLabel, "Particles: %i | FPS: %i", _currentEffect->numAllParticles(), _currentFPS);
+            snprintf(btnLabel, sizeof btnLabel, "Particles: %i | FPS: %i", (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
             newPos.x = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnLabel).x - 18.0;
             ImGui::SameLine();
             newPos.y = ImGui::GetCursorPosY() + 10.0;

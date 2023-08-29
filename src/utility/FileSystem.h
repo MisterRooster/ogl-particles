@@ -21,8 +21,8 @@ namespace nhahn
 		static char* readBinaryFile(const char* filepath);
 		static void writeBinaryFile(const char* filepath, char* data, unsigned long size);
 
-		static bool loadImageFile(const char* filepath, unsigned char* data,
-			int* w, int* h, int* channels, int desired_channels);
+		static unsigned char* FileSystem::loadImageFile(const char* filepath, int* w, int* h,
+			int* channels, int desired_channels);
 
 		static time_t fileLastChanged(const char* path);
 		static unsigned long fileSize(const char* filepath);

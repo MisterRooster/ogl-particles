@@ -11,11 +11,8 @@
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "utility/Debug.h"
-#include "utility/PRNG.h"
 #include "utility/Utils.h"
-#include "particles/ParticleSystem.h"
-#include "particles/ParticleGenerators.h"
-#include "particles/ParticleUpdaters.h"
+#include "particles/Effect.h"
 
 //--------------------------------------------------------------------------------------------------
 
@@ -26,6 +23,10 @@ namespace nhahn
 	std::unique_ptr<SceneView> sceneView;
 	std::unique_ptr<PropertyPanel> propertyPanel;
 	std::shared_ptr<Texture> displayTex;
+
+	std::shared_ptr<IEffect> _tunnelEffect;
+	std::shared_ptr<IEffect> _attractorEffect;
+	std::shared_ptr<IEffect> _fountainEffect;
 
 	void render(double dt)
 	{
@@ -49,9 +50,28 @@ int main()
 		displayTex = std::make_shared<Texture>(TextureType::TEXTURE_2D, 640, 320);
 		sceneView = std::make_unique<SceneView>(displayTex);
 		propertyPanel = std::make_unique<PropertyPanel>();
+
+		// particle effects
+		_tunnelEffect = EffectFactory::create("tunnel");
+		_tunnelEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
+		_tunnelEffect->initializeRenderer("gl");
+
+		_attractorEffect = EffectFactory::create("attractors");
+		_attractorEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
+		_attractorEffect->initializeRenderer("gl");
+
+		_fountainEffect = EffectFactory::create("fountain");
+		_fountainEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
+		_fountainEffect->initializeRenderer("gl");
+
+		sceneView->setEffect(_attractorEffect.get());
 		
 		// run main loop
 		app.run();
+
+		_tunnelEffect->clean();
+		_fountainEffect->clean();
+		_attractorEffect->clean();
 
 		propertyPanel.reset();
 		sceneView.reset();
