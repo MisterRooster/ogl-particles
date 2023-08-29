@@ -116,7 +116,7 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glew-cmake )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 
 ## Put all libraries into a variable
-set(APP_LIBS glfw3 ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
+set(APP_LIBS glfw ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
 # Define the include DIRs
 target_include_directories(${PROJECT_NAME}

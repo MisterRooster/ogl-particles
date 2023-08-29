@@ -102,6 +102,8 @@ namespace nhahn
 				((UINT32)((UINT8*)src)[2] << 16);
 		case 4:
 			return ((UINT32*)src)[0];
+		default:
+			return ((UINT8*)src)[0];
 		}
 	}
 
