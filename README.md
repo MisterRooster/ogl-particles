@@ -1,10 +1,10 @@
 # ogl-particles
 
-Particle simulation with OpenGL. Simulated on the CPU and rendered on the GPU.
-Can handle 500k particles on an AMD R9 290X graphics card.
+Particle simulation with OpenGL. The particles are solved on the CPU and rendered on the GPU.
+Handles half a million particles on an AMD R9 290X GPU.
 
 > **Note**:
-A recent GPU with fresh drivers is necessary to run this application. Support for OpenGL 4.4 core profile is required. 
+A relatively recent GPU with fresh drivers is necessary to run this application. Support for OpenGL 4.4 core profile is required. 
 
 ## Controls
 
