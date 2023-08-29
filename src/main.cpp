@@ -33,7 +33,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 	}
 }
 
@@ -65,7 +65,10 @@ int main()
 		_fountainEffect->initializeRenderer("gl");
 
 		sceneView->setEffect(_attractorEffect.get());
-		
+		propertyPanel->addEffect("Attractor", _attractorEffect);
+		propertyPanel->addEffect("Fountain", _fountainEffect);
+		propertyPanel->addEffect("Tunnel", _tunnelEffect);
+
 		// run main loop
 		app.run();
 

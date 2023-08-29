@@ -27,13 +27,12 @@ namespace nhahn
 		bool initializeRenderer(const char* name) override;
 		void reset() override { m_system->reset(); }
 		void clean() override;
-		//void addUI() override;
-		//void removeUI() override;
 
 		void update(double dt) override;
 		void cpuUpdate(double dt) override;
 		void gpuUpdate(double dt) override;
 		void render() override;
+		void renderUI() override;
 
 		int numAllParticles() override { return m_system->numAllParticles(); }
 		int numAliveParticles() override { return m_system->numAliveParticles(); }

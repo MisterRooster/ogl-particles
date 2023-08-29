@@ -7,37 +7,57 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "PropertyPanel.h"
 
+#include <memory>
 #include "imgui.h"
 
 
 namespace nhahn
 {
+    PropertyPanel::PropertyPanel()
+    {
+        _effectMap = MapOfEffects{};
+        _currEffKey = "";
+    }
+
+    void PropertyPanel::addEffect(std::string name, std::shared_ptr<IEffect> eff)
+    {
+        _effectMap[name] = eff;
+        if (_currEffKey.empty())
+            _currEffKey = name;
+    }
+
     void PropertyPanel::render()
     {
-        ImGui::SetNextWindowSize(ImVec2(200, 300), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Properties");
-        if (ImGui::CollapsingHeader("Colors", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::Begin("Properties"))
         {
-            ImGui::SameLine(0, 5.0f);
-            ImGui::Text("Test234");
+            ImGuiStyle& style = ImGui::GetStyle();
+            float w = ImGui::CalcItemWidth();
+            float spacing = style.ItemInnerSpacing.x;
+
+            ImGui::SeparatorText("Scene:");
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Current Effect:");
+
+            ImGui::SameLine();
+            ImGui::PushItemWidth(w - spacing * 2.0f);
+            if (ImGui::BeginCombo("##cb_effect", _currEffKey.c_str()))
+            {
+                for (auto const& [key, val] : _effectMap)
+                {
+                    bool is_selected = (_currEffKey == key);
+                    if (ImGui::Selectable(key.c_str(), is_selected))
+                        _currEffKey = key;
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth();
+
+            _effectMap[_currEffKey]->renderUI();
         }
-
-        if (ImGui::CollapsingHeader("Material"))
-        {
-            ImGui::ColorPicker3("Color", (float*)&_color, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_DisplayRGB);
-            ImGui::SliderFloat("Roughness", &_roughness, 0.0f, 1.0f);
-            ImGui::SliderFloat("Metallic", &_metallic, 0.0f, 1.0f);
-        }
-
-        if (ImGui::CollapsingHeader("Light"))
-        {
-
-            ImGui::Separator();
-            ImGui::Text("Position");
-            ImGui::Separator();
-        }
-
         ImGui::End();
     }
 }

@@ -86,16 +86,6 @@ namespace nhahn
 		ui::AddTweak("gravity", &m_eulerUpdater->m_globalAcceleration.y, "group=effect min=-20 max=0 step=0.05");
 		ui::AddTweak("bounce", &m_floorUpdater->m_bounceFactor, "group=effect min=0 max=1 step=0.05");
 	}
-
-	void FountainEffect::removeUI()
-	{
-		ui::RemoveVar("start col min");
-		ui::RemoveVar("start col max");
-		ui::RemoveVar("end col min");
-		ui::RemoveVar("end col max");
-		ui::RemoveVar("gravity");
-		ui::RemoveVar("bounce");
-	}
 	//*/
 
 	void FountainEffect::update(double dt)
@@ -120,5 +110,10 @@ namespace nhahn
 	void FountainEffect::render()
 	{
 		m_renderer->render();
+	}
+
+	void FountainEffect::renderUI()
+	{
+		
 	}
 }

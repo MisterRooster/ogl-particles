@@ -88,14 +88,6 @@ namespace nhahn
 		ui::AddTweakColor4f("end col min", &m_colGenerator->m_minEndCol.x, "group=effect");
 		ui::AddTweakColor4f("end col max", &m_colGenerator->m_maxEndCol.x, "group=effect");
 	}
-
-	void TunnelEffect::removeUI()
-	{
-		ui::RemoveVar("start col min");
-		ui::RemoveVar("start col max");
-		ui::RemoveVar("end col min");
-		ui::RemoveVar("end col max");
-	}
 	//*/
 
 	void TunnelEffect::update(double dt)
@@ -122,5 +114,10 @@ namespace nhahn
 	void TunnelEffect::render()
 	{
 		m_renderer->render();
+	}
+
+	void TunnelEffect::renderUI()
+	{
+		
 	}
 }

@@ -7,17 +7,30 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
+#include <map>
+#include <string>
 #include "glm/glm.hpp"
+#include "particles/Effect.h"
 
 
 namespace nhahn
 {
+    class IEffect;
+
     class PropertyPanel
     {
+        using MapOfEffects = std::map<std::string, std::shared_ptr<IEffect>>;
+
     public:
-        PropertyPanel() {}
+        PropertyPanel();
 
         void render();
+
+        void addEffect(std::string name, std::shared_ptr<IEffect> eff);
+
+    protected:
+        MapOfEffects _effectMap;
+        std::string _currEffKey;
 
     private:
         glm::vec3 _color = { 1.0f, 0.0f, 0.0f };

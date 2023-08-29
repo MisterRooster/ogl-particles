@@ -7,16 +7,29 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "AttractorEffect.h"
 
+#include <string>
+#include "imgui.h"
 #include "utility/Debug.h"
 
 
 namespace nhahn
 {
+	void HelpMarker(const char* desc)
+	{
+		ImGui::TextDisabled("(?)");
+		if (ImGui::BeginItemTooltip())
+		{
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+
 	bool AttractorEffect::initialize(size_t numParticles)
 	{
 		const size_t NUM_PARTICLES = numParticles == 0 ? IEffect::DEFAULT_PARTICLE_COUNT : numParticles;
 		m_system = std::make_shared<ParticleSystem>(NUM_PARTICLES);
-
 
 		// common
 		m_colGenerator = std::make_shared<BasicColorGen>();
@@ -120,30 +133,6 @@ namespace nhahn
 		if (m_renderer) m_renderer->destroy();
 	}
 
-	/*/
-	void AttractorEffect::addUI()
-	{
-		ui::AddTweakColor4f("start col min", &m_colGenerator->m_minStartCol.x, "group=effect");
-		ui::AddTweakColor4f("start col max", &m_colGenerator->m_maxStartCol.x, "group=effect");
-		ui::AddTweakColor4f("end col min", &m_colGenerator->m_minEndCol.x, "group=effect");
-		ui::AddTweakColor4f("end col max", &m_colGenerator->m_maxEndCol.x, "group=effect");
-		ui::AddTweak("z scale", &m_zScale, "min=0.0 max=1.0 step=0.05 group=effect");
-		for (size_t i = 0; i < m_attractors->collectionSize(); ++i)
-			ui::AddTweak(("attr " + std::to_string(i + 1)).c_str(), &(m_attractors->get(i)).w, "min=-1.0 max=1.0 step=0.05 group=effect");
-	}
-
-	void AttractorEffect::removeUI()
-	{
-		ui::RemoveVar("start col min");
-		ui::RemoveVar("start col max");
-		ui::RemoveVar("end col min");
-		ui::RemoveVar("end col max");
-		ui::RemoveVar("z scale");
-		for (size_t i = 0; i < m_attractors->collectionSize(); ++i)
-			ui::RemoveVar(("attr " + std::to_string(i + 1)).c_str());
-	}
-	//*/
-
 	void AttractorEffect::update(double dt)
 	{
 		static double time = 0.0;
@@ -175,5 +164,42 @@ namespace nhahn
 	void AttractorEffect::render()
 	{
 		m_renderer->render();
+	}
+
+	void AttractorEffect::renderUI()
+	{
+		ImGui::NewLine();
+		ImGui::TextWrapped(
+			"Effect with four attractor points at different positions which exerts a force on the particles."
+		);
+		ImGui::Spacing();
+		ImGui::NewLine();
+
+		ImGui::SeparatorText("Settings:");
+
+		ImGui::SliderFloat("z scale", &m_zScale, 0.0f, 1.0f);
+		ImGui::SameLine(); HelpMarker("CTRL+click to input value.");
+
+		ImGui::SeparatorText("Colors:");
+
+		ImGui::ColorEdit4("start color min", &m_colGenerator->m_minStartCol.x);
+		ImGui::SameLine(); HelpMarker(
+			"Click on the color square to open a color picker.\n"
+			"Click and hold to use drag and drop.\n"
+			"Right-click on the color square to show options.\n"
+			"CTRL+click on individual component to input value.\n");
+
+		ImGui::ColorEdit4("start color max", &m_colGenerator->m_maxStartCol.x);
+
+		ImGui::ColorEdit4("end color min", &m_colGenerator->m_minEndCol.x);
+		ImGui::ColorEdit4("end color max", &m_colGenerator->m_maxEndCol.x);
+
+		ImGui::SeparatorText("Forces:");
+
+		for (size_t i = 0; i < m_attractors->collectionSize(); ++i)
+		{
+			std::string text = "attractor " + std::to_string(i + 1);
+			ImGui::SliderFloat(text.c_str(), &(m_attractors->get(i)).w, -1.0f, 1.0f, "%.2f");
+		}
 	}
 }

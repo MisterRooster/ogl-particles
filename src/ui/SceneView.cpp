@@ -158,7 +158,8 @@ namespace nhahn
         {
             ImVec2 newPos;
             char btnLabel[64];
-            snprintf(btnLabel, sizeof btnLabel, "Particles: %i | FPS: %i", (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
+            snprintf(btnLabel, sizeof btnLabel, "Particles: %i | FPS: %i",
+                (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
             newPos.x = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnLabel).x - 18.0;
             ImGui::SameLine();
             newPos.y = ImGui::GetCursorPosY() + 10.0;

@@ -22,13 +22,12 @@ namespace nhahn
 		virtual bool initializeRenderer(const char* name) = 0;
 		virtual void reset() = 0;
 		virtual void clean() = 0;
-		//virtual void addUI() = 0;
-		//virtual void removeUI() = 0;
 
 		virtual void update(double dt) = 0;
 		virtual void cpuUpdate(double dt) = 0;
 		virtual void gpuUpdate(double dt) = 0;
 		virtual void render() = 0;
+		virtual void renderUI() = 0;
 
 		virtual int numAllParticles() = 0;
 		virtual int numAliveParticles() = 0;
