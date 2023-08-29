@@ -7,3 +7,6 @@
 [submodule "dependencies/imgui"]
 	path = dependencies/imgui
 	url = https://github.com/MisterRooster/imgui.git
+[submodule "dependencies/glew-cmake"]
+	path = dependencies/glew-cmake
+	url = https://github.com/Perlmint/glew-cmake.git
