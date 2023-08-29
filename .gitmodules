@@ -7,6 +7,3 @@
 [submodule "dependencies/imgui"]
 	path = dependencies/imgui
 	url = https://github.com/MisterRooster/imgui.git
-[submodule "dependencies/glew"]
-	path = dependencies/glew
-	url = https://github.com/nigels-com/glew.git
