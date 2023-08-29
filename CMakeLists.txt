@@ -68,7 +68,7 @@ endif()
 find_package(OpenGL REQUIRED)
 
 # Download all submodules
-find_package(Git QUIT)
+find_package(Git QUIET)
 if (GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 	# Update submodules as needed
 	option(GIT_SUBMODULE "Check submodules during build" ON)
@@ -108,6 +108,8 @@ set( GLFW_INSTALL OFF CACHE BOOL "" FORCE )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glfw )
 
 # GLEW
+set( GLEW_USE_STATIC_LIBS ON CACHE BOOL "" FORCE )
+set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 set( BUILD_UTILS OFF CACHE BOOL "" FORCE )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glew/build/cmake )
 
@@ -115,7 +117,7 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glew/build/cmake )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 
 ## Put all libraries into a variable
-set(APP_LIBS glfw3 ${OPENGL_LIBRARY} glew32s glm::glm ${CMAKE_DL_LIBS})
+set(APP_LIBS glfw3 ${OPENGL_LIBRARY} GLEW::glew glm::glm ${CMAKE_DL_LIBS})
 
 # Define the include DIRs
 target_include_directories(${PROJECT_NAME}
