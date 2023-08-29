@@ -32,10 +32,10 @@ namespace nhahn
 			particleEmitter->addGenerator(m_posGenerator);
 
 			m_colGenerator = std::make_shared<BasicColorGen>();
-			m_colGenerator->m_minStartCol = glm::vec4{ 0.7, 0.0, 0.7, 1.0 };
-			m_colGenerator->m_maxStartCol = glm::vec4{ 1.0, 1.0, 1.0, 1.0 };
-			m_colGenerator->m_minEndCol = glm::vec4{ 0.5, 0.0, 0.6, 0.0 };
-			m_colGenerator->m_maxEndCol = glm::vec4{ 0.7, 0.5, 1.0, 0.0 };
+			m_colGenerator->m_minStartCol = glm::vec4{ 0.344, 0.7, 0.0, 1.0 };
+			m_colGenerator->m_maxStartCol = glm::vec4{ 0.65, 0.413, 0.07, 1.0 };
+			m_colGenerator->m_minEndCol = glm::vec4{ 0.1, 0.6, 0.0, 0.0 };
+			m_colGenerator->m_maxEndCol = glm::vec4{ 0.5, 0.975, 1.0, 0.0 };
 			particleEmitter->addGenerator(m_colGenerator);
 
 			auto velGenerator = std::make_shared<BasicVelGen>();
