@@ -88,7 +88,7 @@ if (NOT EXISTS "${PROJECT_SOURCE_DIR}/dependencies/glfw/CMakeLists.txt")
 	message(FATAL_ERROR "The glfw submodule was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
-if (NOT EXISTS "${PROJECT_SOURCE_DIR}/dependencies/glew/build/cmake/CMakeLists.txt")
+if (NOT EXISTS "${PROJECT_SOURCE_DIR}/dependencies/glew-cmake/CMakeLists.txt")
 	message(FATAL_ERROR "The glew submodule was not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
@@ -108,21 +108,19 @@ set( GLFW_INSTALL OFF CACHE BOOL "" FORCE )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glfw )
 
 # GLEW
-set( GLEW_USE_STATIC_LIBS ON CACHE BOOL "" FORCE )
-set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
-set( BUILD_UTILS OFF CACHE BOOL "" FORCE )
-add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glew/build/cmake )
+set( glew-cmake_BUILD_SHARED OFF CACHE BOOL "" FORCE )
+set( glew-cmake_BUILD_STATIC ON CACHE BOOL "" FORCE )
+add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glew-cmake )
 
 # GLM
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 
 ## Put all libraries into a variable
-set(APP_LIBS glfw3 ${OPENGL_LIBRARY} GLEW::glew glm::glm ${CMAKE_DL_LIBS})
+set(APP_LIBS glfw3 ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
 # Define the include DIRs
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "${CMAKE_SOURCE_DIR}/src"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glew/include"
 	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
 	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glm"
 	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/imgui"
