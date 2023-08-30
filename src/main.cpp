@@ -52,11 +52,11 @@ int main()
 
 		// particle effects
 		_tunnelEffect = EffectFactory::create("tunnel");
-		_tunnelEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
+		_tunnelEffect->initialize(200000);
 		_tunnelEffect->initializeRenderer("gl");
 
 		_attractorEffect = EffectFactory::create("attractors");
-		_attractorEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
+		_attractorEffect->initialize(100000);
 		_attractorEffect->initializeRenderer("gl");
 
 		_fountainEffect = EffectFactory::create("fountain");

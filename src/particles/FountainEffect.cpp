@@ -56,7 +56,7 @@ namespace nhahn
 		m_system->addUpdater(colorUpdater);
 
 		m_eulerUpdater = std::make_shared<EulerUpdater>();
-		m_eulerUpdater->m_globalAcceleration = glm::vec4{ 0.0, -15.0, 0.0, 0.0 };
+		m_eulerUpdater->m_globalAcceleration = glm::vec4{ 0.0, -12.0, 0.0, 0.0 };
 		m_system->addUpdater(m_eulerUpdater);
 
 		m_floorUpdater = std::make_shared<FloorUpdater>();

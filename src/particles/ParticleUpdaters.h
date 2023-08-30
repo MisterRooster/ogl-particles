@@ -22,7 +22,7 @@ namespace nhahn
 		glm::vec4 m_globalAcceleration{ 0.0f };
 	};
 
-	// collision with the floor :) todo: implement a collision model
+	// collision with the floor - note: not a proper collision model
 	class FloorUpdater : public ParticleUpdater
 	{
 	public:

@@ -53,7 +53,7 @@ namespace nhahn
         glEnable(GL_DEPTH_TEST);
 
         // camera
-        _cam = std::make_shared<Camera>(glm::vec3(0, 0, 0.5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        _cam = std::make_shared<Camera>(glm::vec3(0, 0.2, 0.4), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
         // create new render target
         _rt = std::make_unique<RenderTarget>();
@@ -159,7 +159,7 @@ namespace nhahn
 
             _particleTex->bindAny();
             _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
-            glEnable(GL_PROGRAM_POINT_SIZE);
+            //glEnable(GL_PROGRAM_POINT_SIZE);
             _particleProg->bind();
             _particleProg->setUniformI("tex", _particleTex->boundUnit());
             _particleProg->setUniformMat("modelViewMat", _cam->getViewMatrix(), false);
@@ -203,32 +203,44 @@ namespace nhahn
     void SceneView::updateCamera(double dt)
     {
         ImGuiIO& io = ImGui::GetIO();
+        if (ImGui::IsWindowHovered())
+        {
+            // calculate the amount of rotation given the mouse movement.
+            glm::vec4 position(_cam->getEye().x, _cam->getEye().y, _cam->getEye().z, 1);
+            glm::vec4 pivot(_cam->getLookAt().x, _cam->getLookAt().y, _cam->getLookAt().z, 1);
 
-        // calculate the amount of rotation given the mouse movement.
-        glm::vec4 position(_cam->getEye().x, _cam->getEye().y, _cam->getEye().z, 1);
-        glm::vec4 pivot(_cam->getLookAt().x, _cam->getLookAt().y, _cam->getLookAt().z, 1);
-        float deltaAngleX = (2 * M_PI / _screenSize.x);     // a movement from left to right = 2*PI = 360 deg
-        float deltaAngleY = (M_PI / _screenSize.y);         // a movement from top to bottom = PI = 180 deg
+            if (io.MouseDown[0])
+            {
+                float deltaAngleX = (2 * M_PI / _screenSize.x);     // a movement from left to right = 2*PI = 360 deg
+                float deltaAngleY = (M_PI / _screenSize.y);         // a movement from top to bottom = PI = 180 deg
 
-        float xAngle = (io.MouseDelta.x) * deltaAngleX;
-        float yAngle = (io.MouseDelta.y) * deltaAngleY;
+                float xAngle = (io.MouseDelta.x) * deltaAngleX;
+                float yAngle = (io.MouseDelta.y) * deltaAngleY;
 
-        // extra step to handle the problem when the camera direction is the same as the up vector
-        float cosAngle = dot(_cam->getViewDir(), glm::vec3(0,1,0));
-        if (cosAngle * Utils::sgn(deltaAngleY) > 0.99f)
-            deltaAngleY = 0;
+                // extra step to handle the problem when the camera direction is the same as the up vector
+                float cosAngle = dot(_cam->getViewDir(), glm::vec3(0, 1, 0));
+                if (cosAngle * Utils::sgn(deltaAngleY) > 0.99f)
+                    deltaAngleY = 0;
 
-        // rotate the camera around the pivot point on the first axis.
-        glm::mat4x4 rotationMatrixX(1.0f);
-        rotationMatrixX = glm::rotate(rotationMatrixX, xAngle, glm::vec3(0, 1, 0));
-        position = (rotationMatrixX * (position - pivot)) + pivot;
+                // rotate the camera around the pivot point on the first axis.
+                glm::mat4x4 rotationMatrixX(1.0f);
+                rotationMatrixX = glm::rotate(rotationMatrixX, xAngle, glm::vec3(0, 1, 0));
+                position = (rotationMatrixX * (position - pivot)) + pivot;
 
-        // rotate the camera around the pivot point on the second axis.
-        glm::mat4x4 rotationMatrixY(1.0f);
-        rotationMatrixY = glm::rotate(rotationMatrixY, yAngle, _cam->getRightVector());
-        glm::vec3 finalPosition = (rotationMatrixY * (position - pivot)) + pivot;
+                // rotate the camera around the pivot point on the second axis.
+                glm::mat4x4 rotationMatrixY(1.0f);
+                rotationMatrixY = glm::rotate(rotationMatrixY, yAngle, _cam->getRightVector());
+                glm::vec3 finalPosition = (rotationMatrixY * (position - pivot)) + pivot;
 
-        // Update the camera view (we keep the same lookat and the same up vector)
-        _cam->setCameraView(finalPosition, _cam->getLookAt(), glm::vec3(0, 1, 0));
+                // Update the camera view (we keep the same lookat and the same up vector)
+                _cam->setCameraView(finalPosition, _cam->getLookAt(), glm::vec3(0, 1, 0));
+            }
+
+            if (io.MouseDown[1])
+            {
+                position = position + (position - pivot) * io.MouseDelta.y * 0.001f;
+                _cam->setCameraView(position, _cam->getLookAt(), _cam->getUpVector());
+            }
+        }        
     }
 }
