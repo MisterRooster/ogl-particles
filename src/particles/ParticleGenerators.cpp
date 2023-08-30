@@ -92,6 +92,34 @@ namespace nhahn
 		}
 	}
 
+	void SpherePosGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
+	{
+		glm::vec4* RESTRICT pos = p->m_pos.get();
+
+		float rad;
+		float phi;
+		float theta;
+		for (size_t i = startId; i < endId; i += 2)
+		{
+			phi = randFloat(0.0f, M_PI * 2.0f);
+			theta = randFloat(0.0f, M_PI);
+			rad = randFloat(0.0f, m_radius);
+			pos[i] = glm::vec4(m_center + glm::vec4(rad * sinf(theta) * cosf(phi), rad * sinf(theta) * sinf(phi), rad * cosf(theta), 1.0f));
+
+			phi = randFloat(0.0f, M_PI * 2.0f);
+			theta = randFloat(0.0f, M_PI);
+			rad = randFloat(0.0f, m_radius);
+			pos[i + 1] = glm::vec4(m_center + glm::vec4(rad * sinf(theta) * cosf(phi), rad * sinf(theta) * sinf(phi), rad * cosf(theta), 1.0f));
+		}
+		if (endId % 2 != 0)
+		{
+			phi = randFloat(0.0f, M_PI * 2.0f);
+			theta = randFloat(0.0f, M_PI);
+			rad = randFloat(0.0f, m_radius);
+			pos[endId - 1] = glm::vec4(m_center + glm::vec4(rad * sinf(theta) * cosf(phi), rad * sinf(theta) * sinf(phi), rad * cosf(theta), 1.0f));
+		}
+	}
+
 	void BasicColorGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
 		glm::vec4* RESTRICT startCol = p->m_startCol.get();

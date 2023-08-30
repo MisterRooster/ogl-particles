@@ -27,6 +27,7 @@ namespace nhahn
 	std::shared_ptr<IEffect> _tunnelEffect;
 	std::shared_ptr<IEffect> _attractorEffect;
 	std::shared_ptr<IEffect> _fountainEffect;
+	std::shared_ptr<IEffect> _burningEffect;
 
 	void render(double dt)
 	{
@@ -63,10 +64,15 @@ int main()
 		_fountainEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
 		_fountainEffect->initializeRenderer("gl");
 
+		_burningEffect = EffectFactory::create("burning");
+		_burningEffect->initialize(100000);
+		_burningEffect->initializeRenderer("gl");
+
 		sceneView->setEffect(_fountainEffect.get());
 		propertyPanel->addEffect("Fountain", _fountainEffect);
 		propertyPanel->addEffect("Attractor", _attractorEffect);
 		propertyPanel->addEffect("Tunnel", _tunnelEffect);
+		propertyPanel->addEffect("Burning", _burningEffect);
 
 		// notify scene view when settings change
 		propertyPanel->setEffectSwitchedCallback([](std::shared_ptr<IEffect> eff) {
@@ -79,6 +85,7 @@ int main()
 		_tunnelEffect->clean();
 		_fountainEffect->clean();
 		_attractorEffect->clean();
+		_burningEffect->clean();
 
 		propertyPanel.reset();
 		sceneView.reset();

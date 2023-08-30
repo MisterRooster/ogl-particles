@@ -159,7 +159,7 @@ namespace nhahn
 
             _particleTex->bindAny();
             _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
-            //glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_PROGRAM_POINT_SIZE);
             _particleProg->bind();
             _particleProg->setUniformI("tex", _particleTex->boundUnit());
             _particleProg->setUniformMat("modelViewMat", _cam->getViewMatrix(), false);

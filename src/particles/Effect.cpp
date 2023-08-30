@@ -11,6 +11,7 @@
 #include "TunnelEffect.h"
 #include "FountainEffect.h"
 #include "AttractorEffect.h"
+#include "BurningEffect.h"
 
 
 namespace nhahn
@@ -25,6 +26,8 @@ namespace nhahn
 			return std::make_shared<AttractorEffect>();
 		else if (effect == "fountain")
 			return std::make_shared<FountainEffect>();
+		else if (effect == "burning")
+			return std::make_shared<BurningEffect>();
 
 		return nullptr;
 	}

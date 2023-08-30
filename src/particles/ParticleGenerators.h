@@ -41,6 +41,21 @@ namespace nhahn
 		float m_radY;
 	};
 
+	class SpherePosGen : public ParticleGenerator
+	{
+	public:
+		SpherePosGen() : m_center(0.0), m_radius(0.0) { }
+		SpherePosGen(const glm::vec4& center, double radius)
+			: m_center(center), m_radius((float)radius)
+		{ }
+
+		virtual void generate(double dt, ParticleData* p, size_t startId, size_t endId) override;
+
+	public:
+		glm::vec4 m_center;
+		float m_radius;
+	};
+
 	class BasicColorGen : public ParticleGenerator
 	{
 	public:
