@@ -53,7 +53,7 @@ namespace nhahn
         glEnable(GL_DEPTH_TEST);
 
         // camera
-        _cam = std::make_shared<Camera>(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        _cam = std::make_shared<Camera>(glm::vec3(0, 0, 0.5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
         // create new render target
         _rt = std::make_unique<RenderTarget>();
@@ -136,7 +136,7 @@ namespace nhahn
 
         // camera
         updateCamera(dt);
-        glm::mat4 projMat = glm::perspective(glm::radians(45.0f), (float)_screenSize.x / (float)_screenSize.y, 0.1f, 100.0f);
+        glm::mat4 projMat = glm::perspective(glm::radians(54.0f), (float)_screenSize.x / (float)_screenSize.y, 0.1f, 100.0f);
 
         // render source textures to screen texture
         _rt->bind();
@@ -209,6 +209,7 @@ namespace nhahn
         glm::vec4 pivot(_cam->getLookAt().x, _cam->getLookAt().y, _cam->getLookAt().z, 1);
         float deltaAngleX = (2 * M_PI / _screenSize.x);     // a movement from left to right = 2*PI = 360 deg
         float deltaAngleY = (M_PI / _screenSize.y);         // a movement from top to bottom = PI = 180 deg
+
         float xAngle = (io.MouseDelta.x) * deltaAngleX;
         float yAngle = (io.MouseDelta.y) * deltaAngleY;
 

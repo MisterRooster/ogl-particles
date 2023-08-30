@@ -63,9 +63,9 @@ int main()
 		_fountainEffect->initialize(IEffect::DEFAULT_PARTICLE_NUM_FLAG);
 		_fountainEffect->initializeRenderer("gl");
 
-		sceneView->setEffect(_attractorEffect.get());
-		propertyPanel->addEffect("Attractor", _attractorEffect);
+		sceneView->setEffect(_fountainEffect.get());
 		propertyPanel->addEffect("Fountain", _fountainEffect);
+		propertyPanel->addEffect("Attractor", _attractorEffect);
 		propertyPanel->addEffect("Tunnel", _tunnelEffect);
 
 		// notify scene view when settings change
