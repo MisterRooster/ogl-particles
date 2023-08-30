@@ -40,7 +40,7 @@ namespace nhahn
 		void _onClose();
 
 	private:
-		bool init();
+		bool init(bool customTitlebar);
 
 	private:
 		int _width = 0;

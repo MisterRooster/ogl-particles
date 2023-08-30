@@ -299,16 +299,58 @@ namespace nhahn
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		// Create the docking environment
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoBackground;
+		if (_window->hasCustomTitlebar())
+		{
+			ImGuiWindowFlags titlebar_flags =
+				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+				| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+				| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar
+				| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollWithMouse;
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, 25.0f });
+			ImGui::SetNextWindowViewport(viewport->ID);
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 40.0f, 2.0f });
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.01f, 0.01f, 0.01f, 1.0f));
+
+			ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
+			ImGui::PopStyleVar(3);
+			ImGui::PopStyleColor(1);
+
+			//ImGui::Image(img_icon, ImVec2{ 1.0f, 1.0f });
+			//ImGui::SetWindowFontScale(0.75f);
+			//ImGui::PushFont(font_k12hl2);
+			ImGui::TextColored(ImVec4{ 1.0f,1.0f,1.0f,1.0f }, _window->getTitle().c_str());
+			//ImGui::PopFont();
+
+			ImGui::End();
+		}
+		
+		// Create the docking environment
+		ImGuiWindowFlags windowFlags =
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		if (_window->hasCustomTitlebar())
+		{
+			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + 25.0f));
+			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - 25.0f));
+			ImGui::SetNextWindowViewport(viewport->ID);
+		}
+		else
+		{
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
+			ImGui::SetNextWindowViewport(viewport->ID);
+		}
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -316,8 +358,10 @@ namespace nhahn
 
 		ImGui::Begin("MainDockspaceWindow", nullptr, windowFlags);
 		ImGui::PopStyleVar(3);
+
 		ImGuiID dockSpaceId = ImGui::GetID("MainDockspace");
 		ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
 		ImGui::End();
 	}
 
@@ -348,15 +392,18 @@ namespace nhahn
 		DBG("UI", DebugLevel::DEBUG, "UI context destroyed\n");
 	}
 
-	void UIContext::disableTitlebar() {
+	bool UIContext::disableTitlebar() {
 #	ifdef _WIN32
 		auto win = (GLFWwindow*)_window->getNativeWindow();
 		if (win)
 		{
 			disableTitlebarWin32(win);
+			DBG("UI", DebugLevel::DEBUG, "removed windows titlebar");
 		}
+		return true;
 #	else
-		FAIL("NOT IMPLEMENTED ERROR: Disable Titlebar feature not implemented for this platform!");
+		DBG("UI", DebugLevel::WARNING ,"NOT IMPLEMENTED: Disable Titlebar not implemented for this platform!");
+		return false;
 #	endif
 	}
 

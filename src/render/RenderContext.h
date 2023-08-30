@@ -57,7 +57,7 @@ namespace nhahn
         void postRender() override;
         void end() override;
 
-        void disableTitlebar();
+        bool disableTitlebar();
 
     private:
         void setStyleDarkOrange();

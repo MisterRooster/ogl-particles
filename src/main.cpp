@@ -79,7 +79,7 @@ int main()
 	using namespace nhahn;
 
 	{
-		Application app("Particle System");
+		Application app("Roosters OpenGL Particle System");
 		app.setRenderCallback(render, renderTickrate);
 
 		displayTex = std::make_shared<Texture>(TextureType::TEXTURE_2D, 640, 320);
