@@ -47,7 +47,7 @@ namespace nhahn
 
 			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.35f, nullptr, &dockSpaceId);
 			ImGui::DockBuilderDockWindow("Properties", dock_id_left);
-			ImGui::DockBuilderDockWindow("SceneView", dockSpaceId);
+			ImGui::DockBuilderDockWindow("Scene View", dockSpaceId);
 			ImGui::DockBuilderFinish(dockSpaceId);
 			DBG("UI", DebugLevel::DEBUG, "docked child windows to main dockspace\n");
 

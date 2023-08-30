@@ -116,14 +116,13 @@ namespace nhahn
         _currentFPS = (int)(1.0 / dt);
 
         // scene Window
-        ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavFocus;
+        ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
         //ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(_screenSize.x, _screenSize.y), ImGuiCond_FirstUseEver);
-        ImGui::Begin("SceneView", nullptr, screenflags);
+        ImGui::Begin("Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
         ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -195,6 +194,36 @@ namespace nhahn
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
             ImGui::Button(btnLabel);
             ImGui::PopStyleColor(3);
+        }
+
+        // add input info
+        static bool info_open = true;
+        {
+            ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+            const float inputInfo_pad = 10.0f;
+
+            ImVec2 inputInfo_pos;
+            ImVec2 inputInfo_size = ImVec2(200, 50);
+            inputInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - inputInfo_pad;
+            inputInfo_pos.y = ImGui::GetWindowPos().y + ImGui::GetWindowHeight()- inputInfo_pad;
+            ImGui::SetNextWindowPos(inputInfo_pos, ImGuiCond_Always, ImVec2(1.0f, 1.0f));
+            inputInfo_flags |= ImGuiWindowFlags_NoMove;
+
+            ImGui::SetNextWindowBgAlpha(0.3f); // Transparent background
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 5.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 8.0f));
+
+            if (ImGui::BeginChild("InputInfo", inputInfo_size, true, inputInfo_flags))
+            {
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "[LMB + move]: Turn Camera");
+                ImGui::Separator();
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "[RMB + move]: Zoom in/out");
+            }
+            ImGui::PopStyleVar(3);
+            ImGui::EndChild(); 
         }
 
         ImGui::End();
