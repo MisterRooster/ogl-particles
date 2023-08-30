@@ -7,10 +7,12 @@
 \*------------------------------------------------------------------------------------------------*/
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "Application.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "utility/Debug.h"
+#include "utility/FileSystem.h"
 #include "utility/Utils.h"
 #include "particles/Effect.h"
 
@@ -29,8 +31,41 @@ namespace nhahn
 	std::shared_ptr<IEffect> _fountainEffect;
 	std::shared_ptr<IEffect> _burningEffect;
 
+	void splitDockspace()
+	{
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGui::Begin("MainDockspaceWindow");
+
+			ImGuiID dockSpaceId = ImGui::GetID("MainDockspace");
+			ImGuiID dockspace_id_copy = dockSpaceId;
+
+			ImGui::DockBuilderRemoveNode(dockSpaceId); // clear any previous layout
+			ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetMainViewport()->Size);
+
+			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.35f, nullptr, &dockSpaceId);
+			ImGui::DockBuilderDockWindow("Properties", dock_id_left);
+			ImGui::DockBuilderDockWindow("SceneView", dockSpaceId);
+			ImGui::DockBuilderFinish(dockSpaceId);
+			DBG("UI", DebugLevel::DEBUG, "docked child windows to main dockspace\n");
+
+			ImGui::End();
+		}
+	}
+
 	void render(double dt)
 	{
+		// split dockspace and dock subwindows on programs first run
+		std::string path = nhahn::FileSystem::getModuleDirectory() + "imgui.ini";
+		static auto firstCall = true;
+		bool firstTimeEver = firstCall && !FileSystem::fileExists(path.c_str());
+		if (firstTimeEver) {
+			firstCall = false;
+			splitDockspace();
+		}
+
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();

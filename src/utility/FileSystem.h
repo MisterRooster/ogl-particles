@@ -27,6 +27,7 @@ namespace nhahn
 		static time_t fileLastChanged(const char* path);
 		static unsigned long fileSize(const char* filepath);
 		static unsigned long fileSize(FILE* fp);
+		static bool fileExists(const char* filepath);
 
 		static std::string getCurrentDirectory();
 		static std::string getModuleDirectory();

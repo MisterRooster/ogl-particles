@@ -8,6 +8,7 @@
 #pragma once
 
 #include "FileSystem.h"
+#include <sys/stat.h>
 #include "Debug.h"
 
 // Platform defines
@@ -106,6 +107,12 @@ namespace nhahn
 		fseek(fp, prev, SEEK_SET);
 
 		return size;
+	}
+
+	bool FileSystem::fileExists(const char* filepath)
+	{
+		struct stat buffer;
+		return (stat(filepath, &buffer) == 0);
 	}
 
 	unsigned char* FileSystem::loadImageFile(const char* filepath, int* w, int* h,

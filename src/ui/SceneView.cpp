@@ -123,7 +123,7 @@ namespace nhahn
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
         //ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(_screenSize.x, _screenSize.y), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Scene view", nullptr, screenflags);
+        ImGui::Begin("SceneView", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
         ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();

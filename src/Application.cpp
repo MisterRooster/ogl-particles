@@ -27,6 +27,11 @@ namespace nhahn
 		gInput().setConnectionRecheckTime(10);
 	}
 
+	Application::~Application()
+	{
+		DBG("Application", DebugLevel::INFO, "Application end\n");
+	}
+
 	void Application::setRenderCallback(std::function<void(double)> func, double tickrate)
 	{
 		ApplicationCallback ac;

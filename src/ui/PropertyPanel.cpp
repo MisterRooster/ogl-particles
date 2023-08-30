@@ -30,7 +30,7 @@ namespace nhahn
     void PropertyPanel::setEffectSwitchedCallback(std::function<void(std::shared_ptr<IEffect>)> func)
     {
         _effectSwitchedCB = func;
-        DBG("PropertyPanel", DebugLevel::DEBUG, "changes onEffectSwitch callback");
+        DBG("PropertyPanel", DebugLevel::DEBUG, "changed onEffectSwitch callback\n");
     }
 
     void PropertyPanel::render()

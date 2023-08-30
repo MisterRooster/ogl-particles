@@ -29,6 +29,7 @@ namespace nhahn
 	{
 	public:
 		Application(const std::string& appname);
+		~Application();
 
 		static Application& instance() { return *_sInstance; }
 		Window* getWindow() const { return _mainWindow.get(); }
