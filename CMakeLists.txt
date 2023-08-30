@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9.0)
-project(ogl_particles)
+project(ogl-particles)
 
 # Set CXX standard
 set(CMAKE_CXX_STANDARD 17)

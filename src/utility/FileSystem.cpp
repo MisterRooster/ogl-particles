@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------------------------*\
-| verlet_basic
+| ogl-particles
 |
 | Copyright (c) 2023 MisterRooster (github.com/MisterRooster). All rights reserved.
 | Licensed under the MIT license. See LICENSE file for full terms.
@@ -11,16 +11,16 @@
 #include "Debug.h"
 
 // Platform defines
-#define FS2DGPU_PLATFORM_WIN32 1
-#define FS2DGPU_PLATFORM_LINUX 2
-#define FS2DGPU_PLATFORM_OSX 3
+#define NHAPP_PLATFORM_WIN32 1
+#define NHAPP_PLATFORM_LINUX 2
+#define NHAPP_PLATFORM_OSX 3
 
 #if defined( __WIN32__ ) || defined( _WIN32 )
-#	define FS2DGPU_PLATFORM FS2DGPU_PLATFORM_WIN32
+#	define NHAPP_PLATFORM NHAPP_PLATFORM_WIN32
 #elif defined( __APPLE_CC__)
-#	define FS2DGPU_PLATFORM FS2DGPU_PLATFORM_OSX
+#	define NHAPP_PLATFORM NHAPP_PLATFORM_OSX
 #else
-#	define FS2DGPU_PLATFORM FS2DGPU_PLATFORM_LINUX
+#	define NHAPP_PLATFORM NHAPP_PLATFORM_LINUX
 #endif
 
 
@@ -122,7 +122,7 @@ namespace nhahn
 
 //--------------------------------------------------------------------------------------------------
 
-#if FS2DGPU_PLATFORM == FS2DGPU_PLATFORM_WIN32
+#if NHAPP_PLATFORM == NHAPP_PLATFORM_WIN32
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
@@ -217,7 +217,7 @@ namespace nhahn
 
 //--------------------------------------------------------------------------------------------------
 
-#elif FS2DGPU_PLATFORM == FS2DGPU_PLATFORM_LINUX
+#elif NHAPP_PLATFORM == NHAPP_PLATFORM_LINUX
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>

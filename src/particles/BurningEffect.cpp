@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------------------------*\
-| verlet_basic
+| ogl-particles
 |
 | Copyright (c) 2023 MisterRooster (github.com/MisterRooster). All rights reserved.
 | Licensed under the MIT license. See LICENSE file for full terms.
@@ -119,7 +119,7 @@ namespace nhahn
 		ImGui::SliderFloat("rise speed", &m_eulerUpdater->m_globalAcceleration.y, 0.0f, 20.0f, "%.2f");
 		ImGui::SameLine(); Utils::UIHelpMarker("CTRL+click to input value.");
 
-		ImGui::SeparatorText("Colorsd:");
+		ImGui::SeparatorText("Colors:");
 
 		ImGui::ColorEdit4("start color min", &m_colGenerator->m_minStartCol.x);
 		ImGui::SameLine(); Utils::UIHelpMarker(

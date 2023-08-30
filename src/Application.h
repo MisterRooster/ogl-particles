@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------------------------*\
-| verlet_basic
+| ogl-particles
 |
 | Copyright (c) 2023 MisterRooster (github.com/MisterRooster). All rights reserved.
 | Licensed under the MIT license. See LICENSE file for full terms.
