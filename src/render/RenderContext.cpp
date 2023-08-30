@@ -21,6 +21,9 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#ifdef _WIN32
+#	include <dwmapi.h>
+#endif // _WIN32
 
 namespace nhahn
 {
@@ -133,12 +136,17 @@ namespace nhahn
 	
 	            break;
 	        }
+			case WM_NCACTIVATE:
+			{
+				// Prevent non-client area from being redrawn during window activation
+				return TRUE;
+			}
 	    }
 	    
 	    return CallWindowProc(original_proc, hWnd, uMsg, wParam, lParam);
 	}
 
-	void disableTitlebar(GLFWwindow* window)
+	void disableTitlebarWin32(GLFWwindow* window)
 	{
 		HWND hWnd = glfwGetWin32Window(window);
 
@@ -146,6 +154,14 @@ namespace nhahn
 		lStyle |= WS_THICKFRAME;
 		lStyle &= ~WS_CAPTION;
 		SetWindowLongPtr(hWnd, GWL_STYLE, lStyle);
+
+		// Set the window shape and rounded corners
+		DWMNCRENDERINGPOLICY policy = DWMNCRP_ENABLED;
+		DwmSetWindowAttribute(hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof(policy));
+
+		// Extend the frame into the client area
+		MARGINS margins = { -1 };
+		DwmExtendFrameIntoClientArea(hWnd, &margins);
 
 		RECT windowRect;
 		GetWindowRect(hWnd, &windowRect);
@@ -176,6 +192,7 @@ namespace nhahn
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		glfwWindowHint(GLFW_RESIZABLE, true);
+		//glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
 		auto gl_Window = glfwCreateWindow(window->getWidth(), window->getHeight(), window->getTitle().c_str(), NULL, NULL);
 		window->setNativeWindow(gl_Window);
@@ -329,6 +346,18 @@ namespace nhahn
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 		DBG("UI", DebugLevel::DEBUG, "UI context destroyed\n");
+	}
+
+	void UIContext::disableTitlebar() {
+#	ifdef _WIN32
+		auto win = (GLFWwindow*)_window->getNativeWindow();
+		if (win)
+		{
+			disableTitlebarWin32(win);
+		}
+#	else
+		FAIL("NOT IMPLEMENTED ERROR: Disable Titlebar feature not implemented for this platform!");
+#	endif
 	}
 
 	void UIContext::setStyleDarkOrange()

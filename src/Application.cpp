@@ -17,7 +17,7 @@ namespace nhahn
 	Application::Application(const std::string& appname) : _dt(0)
 	{
 		DBG("Application", DebugLevel::INFO, "Application start\n");
-		_mainWindow = std::make_shared<Window>(appname.c_str(), 1280, 720);
+		_mainWindow = std::make_shared<Window>(appname.c_str(), 1280, 720, true);
 
 		// update input at poll rate (replayer manages own tickrate)
 		addUpdateCallback([&](double dt) { gInput().update(dt); });

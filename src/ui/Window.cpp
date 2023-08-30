@@ -14,8 +14,9 @@
 
 namespace nhahn
 {
-	Window::Window(const char* title, unsigned width, unsigned height)
-		: _title(title), _width(width), _height(height), _nativeWindow(nullptr), _isRunning(true)
+	Window::Window(const char* title, unsigned width, unsigned height, bool customTitlebar)
+		: _title(title), _width(width), _height(height), _nativeWindow(nullptr),
+		_isRunning(true), _hasCustomTitlebar(customTitlebar)
 	{		
 		_renderContext = std::make_unique<GLContext>();
 		_uiContext = std::make_unique<UIContext>();
@@ -35,6 +36,8 @@ namespace nhahn
 		_renderContext->init(this);
 		_renderContext->setClearColor(glm::vec4(0.19, 0.24f, 0.26f, 1.0f));
 		_uiContext->init(this);
+		if (_hasCustomTitlebar)
+			_uiContext->disableTitlebar();
 
 		return _isRunning;
 	}
