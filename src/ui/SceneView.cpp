@@ -87,7 +87,7 @@ namespace nhahn
         delete[] data;
 
         // particle texture
-        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\fire_02.png";
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\x4.png";
         
         int textureW, textureH, textureChannels;
         void* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 4);
@@ -161,6 +161,10 @@ namespace nhahn
 
             _particleTex->bindAny();
             _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
+            glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+            glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+            glPointSize(40.0f);
+            glEnable(GL_POINT_SPRITE);
             glEnable(GL_PROGRAM_POINT_SIZE);
             _particleProg->bind();
             _particleProg->setUniformI("tex", _particleTex->boundUnit());
