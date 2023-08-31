@@ -97,7 +97,7 @@ namespace nhahn
         _particleTex->setFormat(TEXEL_FLOAT, 4, 1);
         _particleTex->init();
         _particleTex->copy(textureData);
-        //delete[] textureData;
+        delete[] textureData;
 
         _currentEffect = nullptr;
 
