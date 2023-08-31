@@ -28,7 +28,7 @@ namespace nhahn
 	class Application
 	{
 	public:
-		Application(const std::string& appname);
+		Application(const std::string& appname, bool customTitlebar = false);
 		~Application();
 
 		static Application& instance() { return *_sInstance; }

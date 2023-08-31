@@ -60,6 +60,14 @@ namespace nhahn
         bool disableTitlebar();
 
     private:
+        void attemptDragWindow();
+
         void setStyleDarkOrange();
+
+    private:
+        // for custom titlebar
+        double s_xpos = 0, s_ypos = 0;
+        int w_xsiz = 0, w_ysiz = 0;
+        int dragState = 0;
     };
 }

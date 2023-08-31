@@ -179,6 +179,7 @@ namespace nhahn
             ImGui::SetMouseCursor(7);
 
         // add fps info to corner
+        /*/
         {
             ImVec2 newPos;
             char btnLabel[64];
@@ -194,35 +195,84 @@ namespace nhahn
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
             ImGui::Button(btnLabel);
             ImGui::PopStyleColor(3);
+        }//*/
+
+        // add stats info
+        {
+            char statsLabel[64];
+            snprintf(statsLabel, sizeof statsLabel, "Particles: %i | FPS: %i",
+                (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
+            ImVec2 labelSize = ImGui::CalcTextSize(statsLabel);
+
+            ImGuiWindowFlags statsInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
+                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+            const float statsInfo_margin = 10.0f;
+            const ImVec2 statsInfo_pad = ImVec2(10.0f, 4.0f);
+            
+            ImVec2 statsInfo_size = ImVec2(labelSize.x + statsInfo_pad.x * 2, labelSize.y + statsInfo_pad.y * 2);
+
+            ImGui::SameLine();
+            ImVec2 statsInfo_pos;
+            statsInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - statsInfo_margin;
+            statsInfo_pos.y = ImGui::GetCursorScreenPos().y + statsInfo_margin;
+
+            ImGui::SetNextWindowPos(statsInfo_pos, ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            statsInfo_flags |= ImGuiWindowFlags_NoMove;
+
+            ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+            //ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 2.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, statsInfo_pad);
+
+            if (ImGui::BeginChild("StatsInfo", statsInfo_size, true, statsInfo_flags))
+            {
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), statsLabel);
+            }
+            ImGui::PopStyleVar(2);
+            ImGui::EndChild();
         }
 
         // add input info
-        static bool info_open = true;
         {
-            ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize |
-                ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
-            const float inputInfo_pad = 10.0f;
+            const char* inputlabel1 = "[LMB + move]: Turn Camera";
+            const char* inputlabel2 = "[LMB + move]: Turn Camera";
+            ImVec2 labelSize1 = ImGui::CalcTextSize(inputlabel1);
+            ImVec2 labelSize2 = ImGui::CalcTextSize(inputlabel2);
+
+            ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
+                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+            const float inputInfo_margin = 10.0f;
+            const ImVec2 inputInfo_pad = ImVec2(10.0f, 4.0f);
+
+            ImVec2 inputInfo_size = ImVec2(std::max(labelSize1.x, labelSize2.x) + inputInfo_pad.x * 2,
+                labelSize1.y + labelSize2.y + inputInfo_pad.y * 2 + 9.0f);
 
             ImVec2 inputInfo_pos;
-            ImVec2 inputInfo_size = ImVec2(200, 50);
-            inputInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - inputInfo_pad;
-            inputInfo_pos.y = ImGui::GetWindowPos().y + ImGui::GetWindowHeight()- inputInfo_pad;
+            inputInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - inputInfo_margin;
+            inputInfo_pos.y = ImGui::GetWindowPos().y + ImGui::GetWindowHeight() - inputInfo_margin;
+
             ImGui::SetNextWindowPos(inputInfo_pos, ImGuiCond_Always, ImVec2(1.0f, 1.0f));
             inputInfo_flags |= ImGuiWindowFlags_NoMove;
 
-            ImGui::SetNextWindowBgAlpha(0.3f); // Transparent background
+            ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
 
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 5.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 8.0f));
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+            //ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 2.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, inputInfo_pad);
 
             if (ImGui::BeginChild("InputInfo", inputInfo_size, true, inputInfo_flags))
             {
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "[LMB + move]: Turn Camera");
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel1);
+                ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
                 ImGui::Separator();
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "[RMB + move]: Zoom in/out");
+                ImGui::PopStyleColor(1);
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel2);
             }
-            ImGui::PopStyleVar(3);
+            ImGui::PopStyleVar(2);
             ImGui::EndChild(); 
         }
 

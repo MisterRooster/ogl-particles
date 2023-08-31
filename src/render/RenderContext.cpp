@@ -98,7 +98,7 @@ namespace nhahn
 	        case WM_NCHITTEST:
 	        {
 	            // Expand the hit test area for resizing
-	            const int borderWidth = 8; // Adjust this value to control the hit test area size
+	            const int borderWidth = 4; // Adjust this value to control the hit test area size
 	
 	            POINTS mousePos = MAKEPOINTS(lParam);
 	            POINT clientMousePos = { mousePos.x, mousePos.y };
@@ -312,10 +312,11 @@ namespace nhahn
 			ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, 25.0f });
 			ImGui::SetNextWindowViewport(viewport->ID);
 
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 40.0f, 2.0f });
-			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.01f, 0.01f, 0.01f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
 
 			ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
 			ImGui::PopStyleVar(3);
@@ -363,6 +364,8 @@ namespace nhahn
 		ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 
 		ImGui::End();
+
+		if (_window->hasCustomTitlebar()) attemptDragWindow();
 	}
 
 	void UIContext::postRender()
@@ -407,22 +410,51 @@ namespace nhahn
 #	endif
 	}
 
+	void UIContext::attemptDragWindow() {
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+
+		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && dragState == 0) {
+			glfwGetCursorPos(window, &s_xpos, &s_ypos);
+			glfwGetWindowSize(window, &w_xsiz, &w_ysiz);
+			dragState = 1;
+		}
+		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && dragState == 1) {
+			double c_xpos, c_ypos;
+			int w_xpos, w_ypos;
+			glfwGetCursorPos(window, &c_xpos, &c_ypos);
+			glfwGetWindowPos(window, &w_xpos, &w_ypos);
+			if (
+				s_xpos >= 0 && s_xpos <= ((double)w_xsiz - 170) &&
+				s_ypos >= 0 && s_ypos <= 25) {
+				glfwSetWindowPos(window, w_xpos + (c_xpos - s_xpos + 6), w_ypos + (c_ypos - s_ypos + 30));
+			}
+			if (
+				s_xpos >= ((double)w_xsiz - 15) && s_xpos <= ((double)w_xsiz) &&
+				s_ypos >= ((double)w_ysiz - 15) && s_ypos <= ((double)w_ysiz)) {
+				glfwSetWindowSize(window, w_xsiz + (c_xpos - s_xpos), w_ysiz + (c_ypos - s_ypos));
+			}
+		}
+		if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && dragState == 1) {
+			dragState = 0;
+		}
+	}
+
 	void UIContext::setStyleDarkOrange()
 	{
 		ImVec4* colors = ImGui::GetStyle().Colors;
 		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-		colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_ChildBg] = ImVec4(0.80f, 0.41f, 0.24f, 0.0f);
 		colors[ImGuiCol_PopupBg] = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
-		colors[ImGuiCol_Border] = ImVec4(0.19f, 0.19f, 0.19f, 0.29f);
-		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
+		colors[ImGuiCol_Border] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
+		colors[ImGuiCol_BorderShadow] = ImVec4(0.202f, 0.202f, 0.202f, 0.240f);
 		colors[ImGuiCol_FrameBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
 		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
 		colors[ImGuiCol_FrameBgActive] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-		colors[ImGuiCol_TitleBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
-		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 		colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
 		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
@@ -434,10 +466,10 @@ namespace nhahn
 		colors[ImGuiCol_Button] = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
 		colors[ImGuiCol_ButtonHovered] = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
 		colors[ImGuiCol_ButtonActive] = ImVec4(0.68f, 0.35f, 0.20f, 1.00f);
-		colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-		colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
+		colors[ImGuiCol_Header] = ImVec4(0.06f, 0.06f, 0.06f, 0.52f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.06f, 0.06f, 0.06f, 0.36f);
 		colors[ImGuiCol_HeaderActive] = ImVec4(0.80f, 0.41f, 0.24f, 0.33f);
-		colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+		colors[ImGuiCol_Separator] = ImVec4(0.296f, 0.404f, 0.497f, 0.290f);
 		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
 		colors[ImGuiCol_SeparatorActive] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
 		colors[ImGuiCol_ResizeGrip] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
@@ -489,5 +521,7 @@ namespace nhahn
 		style.GrabRounding = 3;
 		style.LogSliderDeadzone = 4;
 		style.TabRounding = 4;
+		style.DockingSeparatorSize = 4;
+		style.WindowMenuButtonPosition = ImGuiDir_Right;
 	}
 }

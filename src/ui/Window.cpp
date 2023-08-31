@@ -34,12 +34,14 @@ namespace nhahn
 	bool Window::init(bool customTitlebar)
 	{
 		_renderContext->init(this);
-		_renderContext->setClearColor(glm::vec4(0.19, 0.24f, 0.26f, 1.0f));
+		//_renderContext->setClearColor(glm::vec4(0.19, 0.24f, 0.26f, 1.0f));
+		_renderContext->setClearColor(glm::vec4(0.06f, 0.06f, 0.06f, 1.0f));
 		_uiContext->init(this);
 
 		if (customTitlebar)
 		{
 			_hasCustomTitlebar = _uiContext->disableTitlebar();
+			//_hasCustomTitlebar = true;
 		}
 
 		return _isRunning;

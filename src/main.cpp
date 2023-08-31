@@ -69,6 +69,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
+		ImGui::ShowDemoWindow();
 	}
 }
 
@@ -79,7 +80,7 @@ int main()
 	using namespace nhahn;
 
 	{
-		Application app("Roosters OpenGL Particle System");
+		Application app("Roosters OpenGL Particle System", true);
 		app.setRenderCallback(render, renderTickrate);
 
 		displayTex = std::make_shared<Texture>(TextureType::TEXTURE_2D, 640, 320);
