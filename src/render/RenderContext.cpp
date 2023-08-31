@@ -319,7 +319,7 @@ namespace nhahn
 			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
 
 			ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
-			ImGui::PopStyleVar(3);
+			ImGui::PopStyleVar(4);
 			ImGui::PopStyleColor(1);
 
 			//ImGui::Image(img_icon, ImVec2{ 1.0f, 1.0f });

@@ -87,14 +87,17 @@ namespace nhahn
         delete[] data;
 
         // particle texture
-        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data/particle.png";
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\fire_02.png";
         
         int textureW, textureH, textureChannels;
-        unsigned char* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 0);
+        void* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 4);
 
+        // create buffer object
         _particleTex = std::make_unique<Texture>(TEXTURE_2D, textureW, textureH);
+        _particleTex->setFormat(TEXEL_FLOAT, 4, 1);
+        _particleTex->init();
         _particleTex->copy(textureData);
-        delete[] textureData;
+        //delete[] textureData;
 
         _currentEffect = nullptr;
 
@@ -178,25 +181,6 @@ namespace nhahn
         if (ImGui::IsItemHovered())
             ImGui::SetMouseCursor(7);
 
-        // add fps info to corner
-        /*/
-        {
-            ImVec2 newPos;
-            char btnLabel[64];
-            snprintf(btnLabel, sizeof btnLabel, "Particles: %i | FPS: %i",
-                (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
-            newPos.x = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnLabel).x - 18.0;
-            ImGui::SameLine();
-            newPos.y = ImGui::GetCursorPosY() + 10.0;
-            ImGui::SetCursorPos(newPos);
-
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::Button(btnLabel);
-            ImGui::PopStyleColor(3);
-        }//*/
-
         // add stats info
         {
             char statsLabel[64];
@@ -223,7 +207,6 @@ namespace nhahn
 
             ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
-            //ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 2.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, statsInfo_pad);
 
             if (ImGui::BeginChild("StatsInfo", statsInfo_size, true, statsInfo_flags))
@@ -261,7 +244,6 @@ namespace nhahn
             ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
 
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
-            //ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 2.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, inputInfo_pad);
 
             if (ImGui::BeginChild("InputInfo", inputInfo_size, true, inputInfo_flags))

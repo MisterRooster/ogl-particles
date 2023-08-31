@@ -7,6 +7,7 @@ out vec4 vFragColor;
 void main() 
 {
 	//vFragColor = texture(tex, gl_PointCoord) * outColor;
-	//vFragColor = texture(tex, gl_PointCoord) * vec4(1.0);
-	vFragColor = outColor;
+	float a =  texture(tex, gl_PointCoord);
+	vFragColor = vec4(outColor.x, outColor.y, outColor.z, a);
+	//vFragColor = outColor;
 }
