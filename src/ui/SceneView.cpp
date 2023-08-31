@@ -224,7 +224,7 @@ namespace nhahn
         // add input info
         {
             const char* inputlabel1 = "[LMB + move]: Turn Camera";
-            const char* inputlabel2 = "[LMB + move]: Turn Camera";
+            const char* inputlabel2 = "[RMB + move]: Zoom in/out";
             ImVec2 labelSize1 = ImGui::CalcTextSize(inputlabel1);
             ImVec2 labelSize2 = ImGui::CalcTextSize(inputlabel2);
 
