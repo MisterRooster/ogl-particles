@@ -1,6 +1,10 @@
+![Preview](preview.gif)
+
 # ogl-particles
 
-Particle simulation with OpenGL. The particles are solved on the CPU and rendered on the GPU.
+Particle simulation with OpenGL and Imgui as user interface.
+The particles are solved on the CPU and rendered on the GPU.
+SSE & AVX intrinsics are used to speed up vector calculations.
 Handles half a million particles on an AMD R9 290X GPU.
 
 > **Note**:
@@ -9,8 +13,8 @@ A relatively recent GPU with fresh drivers is necessary to run this application.
 ## Controls
 
  + **[ LMB + Drag ]** &emsp;&emsp;Turn Camera
- + **[ Mouse Wheel ]** &emsp;&nbsp;Zoom in & out
- + **[ END ]** &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;Quit
+ + **[ RMB + Drag ]** &emsp;&emsp;Zoom in & out
+ + **[ ESCAPE ]** &emsp;&emsp;&emsp;&emsp;&nbsp;Quit
 
 ## How to Compile
 Clone the repo:
