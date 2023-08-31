@@ -102,8 +102,8 @@ namespace nhahn
 		const size_t count = m_system->numAliveParticles();
 		if (count > 0)
 		{
-			float* posPtr = (float*)(m_system->finalData()->m_pos.get());
-			float* colPtr = (float*)(m_system->finalData()->m_col.get());
+			float* posPtr = (float*)(m_system->finalData()->m_pos);
+			float* colPtr = (float*)(m_system->finalData()->m_col);
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_bufPos);
 			//glBufferData(GL_ARRAY_BUFFER, count*sizeof(float) * 4, nullptr, GL_DYNAMIC_DRAW);
@@ -136,8 +136,8 @@ namespace nhahn
 		const size_t count = m_system->numAliveParticles();
 		if (count > 0)
 		{
-			float* posPtr = (float*)(m_system->finalData()->m_pos.get());
-			float* colPtr = (float*)(m_system->finalData()->m_col.get());
+			float* posPtr = (float*)(m_system->finalData()->m_pos);
+			float* colPtr = (float*)(m_system->finalData()->m_col);
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_bufPos);
 			//glInvalidateBufferData(GL_ARRAY_BUFFER);
@@ -184,8 +184,8 @@ namespace nhahn
 		const size_t count = m_system->numAliveParticles();
 		if (count > 0)
 		{
-			float* posPtr = (float*)(m_system->finalData()->m_pos.get());
-			float* colPtr = (float*)(m_system->finalData()->m_col.get());
+			float* posPtr = (float*)(m_system->finalData()->m_pos);
+			float* colPtr = (float*)(m_system->finalData()->m_col);
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_doubleBufPos[m_id]);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, count * sizeof(float) * POS_ELEMENTS, posPtr);
@@ -267,8 +267,8 @@ namespace nhahn
 		const size_t count = m_system->numAliveParticles();
 		if (count > 0)
 		{
-			float* posPtr = (float*)(m_system->finalData()->m_pos.get());
-			float* colPtr = (float*)(m_system->finalData()->m_col.get());
+			float* posPtr = (float*)(m_system->finalData()->m_pos);
+			float* colPtr = (float*)(m_system->finalData()->m_col);
 			const size_t maxCount = m_system->numAllParticles();
 
 			for (size_t i = m_id * maxCount, j = 0; i < m_id * maxCount + count; i += 2, j += 8)

@@ -15,7 +15,7 @@
 #define SSE_MODE_NONE 0
 #define SSE_MODE_SSE2 1
 #define SSE_MODE_AVX 2
-#define SSE_MODE SSE_MODE_NONE
+#define SSE_MODE SSE_MODE_AVX
 
 #define RESTRICT __restrict
 
@@ -28,9 +28,9 @@ namespace nhahn
 		const float localDT = (float)dt;
 		const unsigned int endId = p->m_countAlive;
 
-		glm::vec4* RESTRICT acc = p->m_acc.get();
-		glm::vec4* RESTRICT vel = p->m_vel.get();
-		glm::vec4* RESTRICT pos = p->m_pos.get();
+		glm::vec4* RESTRICT acc = p->m_acc;
+		glm::vec4* RESTRICT vel = p->m_vel;
+		glm::vec4* RESTRICT pos = p->m_pos;
 
 	#if SSE_MODE == SSE_MODE_NONE
 		for (size_t i = 0; i < endId; ++i)
@@ -42,7 +42,7 @@ namespace nhahn
 		for (size_t i = 0; i < endId; ++i)
 			pos[i] += localDT * vel[i];
 	#elif SSE_MODE == SSE_MODE_SSE2
-		__m128 ga = globalA.Data;
+		__m128 ga = *(__m128*)(&globalA.data);
 		__m128* pa, * pb, pc;
 		__m128 ldt = _mm_set_ps1(localDT);
 
@@ -69,7 +69,7 @@ namespace nhahn
 			*pa = _mm_add_ps(*pa, pc);
 		}
 	#elif SSE_MODE == SSE_MODE_AVX
-		__m256 ga = _mm256_set_m128(globalA.Data, globalA.Data);
+		__m256 ga = _mm256_set_m128(*(__m128*)(&globalA.data), *(__m128*)(&globalA.data));
 		__m256* pa, * pb, pc;
 		__m256 ldt = _mm256_set1_ps(localDT);
 		size_t i;
@@ -114,9 +114,9 @@ namespace nhahn
 	{
 		const float localDT = (float)dt;
 
-		glm::vec4* RESTRICT acc = p->m_acc.get();
-		glm::vec4* RESTRICT vel = p->m_vel.get();
-		glm::vec4* RESTRICT pos = p->m_pos.get();
+		glm::vec4* RESTRICT acc = p->m_acc;
+		glm::vec4* RESTRICT vel = p->m_vel;
+		glm::vec4* RESTRICT pos = p->m_pos;
 
 		const size_t endId = p->m_countAlive;
 		for (size_t i = 0; i < endId; ++i)
@@ -167,9 +167,9 @@ namespace nhahn
 
 		const float localDT = (float)dt;
 
-		glm::vec4* RESTRICT acc = p->m_acc.get();
-		glm::vec4* RESTRICT vel = p->m_vel.get();
-		glm::vec4* RESTRICT pos = p->m_pos.get();
+		glm::vec4* RESTRICT acc = p->m_acc;
+		glm::vec4* RESTRICT vel = p->m_vel;
+		glm::vec4* RESTRICT pos = p->m_pos;
 
 		const size_t endId = p->m_countAlive;
 		glm::vec4 off = glm::vec4(0.0f);
@@ -191,7 +191,7 @@ namespace nhahn
 				p->m_acc[i] += off * dist;
 		#elif SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
 				off = attr[a] - p->m_pos[i];
-				tempDist = _mm_dp_ps(off.Data, off.Data, 0x71);
+				tempDist = _mm_dp_ps(*(__m128*)(&off.data), *(__m128*)(&off.data), 0x71);
 				tempDist.m128_f32[0] = attr[a].w / tempDist.m128_f32[0];// *inverse2(fabs(tempDist.m128_f32[0]);
 				p->m_acc[i] += off * tempDist.m128_f32[0];
 		#endif
@@ -203,10 +203,10 @@ namespace nhahn
 	{
 		const size_t endId = p->m_countAlive;
 
-		glm::vec4* RESTRICT col = p->m_col.get();
-		glm::vec4* RESTRICT startCol = p->m_startCol.get();
-		glm::vec4* RESTRICT endCol = p->m_endCol.get();
-		glm::vec4* RESTRICT ti = p->m_time.get();
+		glm::vec4* RESTRICT col = p->m_col;
+		glm::vec4* RESTRICT startCol = p->m_startCol;
+		glm::vec4* RESTRICT endCol = p->m_endCol;
+		glm::vec4* RESTRICT ti = p->m_time;
 
 	#if SSE_MODE == SSE_MODE_NONE
 		for (size_t i = 0; i < endId; ++i)
@@ -218,20 +218,20 @@ namespace nhahn
 		for (size_t i = 0; i < endId; i++)
 		{
 			t = _mm_set1_ps(ti[i].z);
-			x = _mm_sub_ps(endCol[i].Data, startCol[i].Data);
+			x = _mm_sub_ps(*(__m128*)(&endCol[i].data), *(__m128*)(&startCol[i].data));
 			y = _mm_mul_ps(t, x);
-			col[i].Data = _mm_add_ps(startCol[i].Data, y);
+			*(__m128*)(&col[i].data) = _mm_add_ps(*(__m128*)(&startCol[i].data), y);
 		}
 	#endif
 	}
 
 	void PosColorUpdater::update(double dt, ParticleData* p)
 	{
-		glm::vec4* RESTRICT pos = p->m_pos.get();
-		glm::vec4* RESTRICT col = p->m_col.get();
-		glm::vec4* RESTRICT startCol = p->m_startCol.get();
-		glm::vec4* RESTRICT endCol = p->m_endCol.get();
-		glm::vec4* RESTRICT time = p->m_time.get();
+		glm::vec4* RESTRICT pos = p->m_pos;
+		glm::vec4* RESTRICT col = p->m_col;
+		glm::vec4* RESTRICT startCol = p->m_startCol;
+		glm::vec4* RESTRICT endCol = p->m_endCol;
+		glm::vec4* RESTRICT time = p->m_time;
 
 		const size_t endId = p->m_countAlive;
 		float scaler, scaleg, scaleb;
@@ -252,11 +252,11 @@ namespace nhahn
 
 	void VelColorUpdater::update(double dt, ParticleData* p)
 	{
-		glm::vec4* RESTRICT vel = p->m_vel.get();
-		glm::vec4* RESTRICT col = p->m_col.get();
-		glm::vec4* RESTRICT startCol = p->m_startCol.get();
-		glm::vec4* RESTRICT endCol = p->m_endCol.get();
-		glm::vec4* RESTRICT time = p->m_time.get();
+		glm::vec4* RESTRICT vel = p->m_vel;
+		glm::vec4* RESTRICT col = p->m_col;
+		glm::vec4* RESTRICT startCol = p->m_startCol;
+		glm::vec4* RESTRICT endCol = p->m_endCol;
+		glm::vec4* RESTRICT time = p->m_time;
 
 		const size_t endId = p->m_countAlive;
 		float scaler, scaleg, scaleb;
@@ -282,7 +282,7 @@ namespace nhahn
 
 		if (endId == 0) return;
 
-		glm::vec4* RESTRICT t = p->m_time.get();
+		glm::vec4* RESTRICT t = p->m_time;
 
 		for (size_t i = 0; i < endId; i += 2)
 		{

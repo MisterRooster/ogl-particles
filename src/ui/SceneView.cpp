@@ -87,7 +87,7 @@ namespace nhahn
         delete[] data;
 
         // particle texture
-        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\x4.png";
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\scorch_02.png";
         
         int textureW, textureH, textureChannels;
         void* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 4);
@@ -165,7 +165,7 @@ namespace nhahn
             glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
             glPointSize(40.0f);
             glEnable(GL_POINT_SPRITE);
-            glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
             _particleProg->bind();
             _particleProg->setUniformI("tex", _particleTex->boundUnit());
             _particleProg->setUniformMat("modelViewMat", _cam->getViewMatrix(), false);

@@ -7,9 +7,12 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
-#include <glm/vec4.hpp>
 #include "utility/Types.h"
 
+#ifndef GLM_FORCE_INTRINSICS
+#define GLM_FORCE_INTRINSICS
+#endif // !GLM_FORCE_INTRINSICS
+#include <glm/glm.hpp>
 
 namespace nhahn
 {
@@ -18,7 +21,7 @@ namespace nhahn
     public:
         ParticleData() { }
         explicit ParticleData(size_t maxCount) { generate(maxCount); }
-        ~ParticleData() { }
+        ~ParticleData();
 
         ParticleData(const ParticleData&) = delete;
         ParticleData& operator=(const ParticleData&) = delete;
@@ -32,13 +35,13 @@ namespace nhahn
         static size_t computeMemoryUsage(const ParticleData& p);
 
     public:
-        std::unique_ptr<glm::vec4[]> m_pos;
-        std::unique_ptr<glm::vec4[]> m_col;
-        std::unique_ptr<glm::vec4[]> m_startCol;
-        std::unique_ptr<glm::vec4[]> m_endCol;
-        std::unique_ptr<glm::vec4[]> m_vel;
-        std::unique_ptr<glm::vec4[]> m_acc;
-        std::unique_ptr<glm::vec4[]> m_time;
+        glm::vec4* m_pos;
+        glm::vec4* m_col;
+        glm::vec4* m_startCol;
+        glm::vec4* m_endCol;
+        glm::vec4* m_vel;
+        glm::vec4* m_acc;
+        glm::vec4* m_time;
         std::unique_ptr<bool[]>  m_alive;
 
         size_t m_count{ 0 };

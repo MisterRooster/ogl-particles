@@ -101,7 +101,7 @@ int main()
 		_fountainEffect->initializeRenderer("gl");
 
 		_burningEffect = EffectFactory::create("burning");
-		_burningEffect->initialize(100000);
+		_burningEffect->initialize(4000);
 		_burningEffect->initializeRenderer("gl");
 
 		sceneView->setEffect(_fountainEffect.get());

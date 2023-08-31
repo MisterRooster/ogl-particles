@@ -44,7 +44,7 @@ namespace nhahn
 
 			auto timeGenerator = std::make_shared<BasicTimeGen>();
 			timeGenerator->m_minTime = 3.0f;
-			timeGenerator->m_maxTime = 4.0f;
+			timeGenerator->m_maxTime = 5.0f;
 			particleEmitter->addGenerator(timeGenerator);
 		}
 		m_system->addEmitter(particleEmitter);

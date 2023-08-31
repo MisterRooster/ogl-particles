@@ -7,7 +7,11 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
+#ifndef GLM_FORCE_INTRINSICS
+#define GLM_FORCE_INTRINSICS
+#endif // !GLM_FORCE_INTRINSICS
 #include <glm/vec4.hpp>
+
 #include "ParticleSystem.h"
 
 
