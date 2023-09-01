@@ -392,26 +392,30 @@ namespace nhahn
 		// app title 
 		//ImGui::SetWindowFontScale(0.75f);
 		//ImGui::PushFont(font_k12hl2);
+		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 6 });
 		ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), _window->getTitle().c_str());
+		//ImGui::PopStyleVar(1);
 		//ImGui::PopFont();
 
 		// close, minimize & maximize buttons
-		float buttons_w = 100.0f;
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0,3 });
+		float buttons_w = 69.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 3 });
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{ 0.5f, 1.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 2, 0 });
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
-		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 21,21 }))
+		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 21, 21 }))
 			switchMinimized();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 21,21 }))
+		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 21, 21 }))
 			switchMaximize();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 21,21 }))
-			switchMaximize();
+		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 21, 21 }))
+			_window->_onClose();
 
-		ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar(4);
 
 		ImGui::End();
 	}
