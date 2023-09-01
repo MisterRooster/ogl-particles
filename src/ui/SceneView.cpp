@@ -47,7 +47,7 @@ namespace nhahn
         : _srcD(t), _screenSize(400, 225)
     {
         _srcSize = glm::vec2(t->width(), t->height());
-        std::string path = nhahn::FileSystem::getModuleDirectory() + "data/shaders/";
+        std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
 
         // global gl stats
         glEnable(GL_DEPTH_TEST);
@@ -87,7 +87,7 @@ namespace nhahn
         delete[] data;
 
         // particle texture
-        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\scorch_02.png";
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\sprites\\scorch_02.png";
         
         int textureW, textureH, textureChannels;
         void* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 4);

@@ -33,8 +33,11 @@ namespace nhahn
 		void preRender(double dt) const;
 		void postRender(double dt) const;
 
-		bool isRunning() { return _isRunning; }
-		bool hasCustomTitlebar() { return _hasCustomTitlebar; }
+		bool isRunning() const { return _isRunning; }
+		bool hasCustomTitlebar() const { return _hasCustomTitlebar; }
+
+		void switchMaximize() const;
+		void switchMinimized() const;
 
 		void _onResize(int width, int height);
 		void _onClose();

@@ -57,12 +57,16 @@ namespace nhahn
         void postRender() override;
         void end() override;
 
-        bool disableTitlebar();
+        bool disableTitlebar() const;
+        void switchMaximize() const;
+        void switchMinimized() const;
 
     private:
         void attemptDragWindow();
 
-        void setStyleDarkOrange();
+        void renderCustomTitlebar() const;
+
+        void setStyleDarkOrange() const;
 
     private:
         // for custom titlebar

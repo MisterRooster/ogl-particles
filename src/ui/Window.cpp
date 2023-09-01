@@ -41,7 +41,6 @@ namespace nhahn
 		if (customTitlebar)
 		{
 			_hasCustomTitlebar = _uiContext->disableTitlebar();
-			//_hasCustomTitlebar = true;
 		}
 
 		return _isRunning;
@@ -61,6 +60,16 @@ namespace nhahn
 		_uiContext->postRender();
 		// Render end, swap buffers
 		_renderContext->postRender();
+	}
+
+	void Window::switchMaximize() const
+	{
+		_uiContext->switchMaximize();
+	}
+
+	void Window::switchMinimized() const
+	{
+		_uiContext->switchMinimized();
 	}
 
 	void Window::_onResize(int width, int height)

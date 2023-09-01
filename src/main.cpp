@@ -45,7 +45,7 @@ namespace nhahn
 			ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
 			ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetMainViewport()->Size);
 
-			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.35f, nullptr, &dockSpaceId);
+			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.25f, nullptr, &dockSpaceId);
 			ImGui::DockBuilderDockWindow("Properties", dock_id_left);
 			ImGui::DockBuilderDockWindow("Scene View", dockSpaceId);
 			ImGui::DockBuilderFinish(dockSpaceId);
@@ -69,7 +69,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 	}
 }
 

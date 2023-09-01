@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------------------------*\
+﻿/*------------------------------------------------------------------------------------------------*\
 | ogl-particles
 |
 | Copyright (c) 2023 MisterRooster (github.com/MisterRooster). All rights reserved.
@@ -12,8 +12,10 @@
 #include "backends/imgui_impl_opengl3.h"
 
 #include "ui/Window.h"
+#include "ui/IconFontDefines.h"
 #include "input/Input.h"
 #include "utility/Debug.h"
+#include "utility/FileSystem.h"
 
 #include "GL/glew.h"
 #define GLFW_INCLUDE_GLEXT
@@ -84,9 +86,9 @@ namespace nhahn
 	            {
 	                NCCALCSIZE_PARAMS* pParams = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 	                pParams->rgrc[0].top += 1;
-	                pParams->rgrc[0].right -= 2;
-	                pParams->rgrc[0].bottom -= 2;
-	                pParams->rgrc[0].left += 2;
+	                pParams->rgrc[0].right -= 1;
+	                pParams->rgrc[0].bottom -= 1;
+	                pParams->rgrc[0].left += 1;
 	            }
 	            return 0;
 	        }
@@ -192,7 +194,7 @@ namespace nhahn
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		glfwWindowHint(GLFW_RESIZABLE, true);
-		//glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+		glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
 		auto gl_Window = glfwCreateWindow(window->getWidth(), window->getHeight(), window->getTitle().c_str(), NULL, NULL);
 		window->setNativeWindow(gl_Window);
@@ -257,7 +259,7 @@ namespace nhahn
 		__super::init(window);
 
 		// GL 3.0 + GLSL 410
-		const char* glsl_version = "#version 410";
+		const char* glsl_version = "#version 440";
 
 		// setup dear imgui context
 		IMGUI_CHECKVERSION();
@@ -284,9 +286,27 @@ namespace nhahn
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			//style.WindowRounding = 0.0f;
-			//style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+
+		// load custom font
+		std::string df_path = FileSystem::getModuleDirectory() + "data\\Ubuntu-Regular.ttf";
+		std::string if_path = FileSystem::getModuleDirectory() + "data\\codicon.ttf";
+
+		float base_font_size = 13.0f;
+		float icon_font_size = base_font_size * 1.0f;
+		ImFontConfig df_config;
+		df_config.RasterizerMultiply = 1.05f;
+		io.Fonts->AddFontFromFileTTF(df_path.c_str(), base_font_size, &df_config);
+
+		// merge in icons from Font Awesome
+		static const ImWchar icons_ranges[] = { ICON_MIN_CI, ICON_MAX_16_CI, 0 };
+		ImFontConfig icons_config;
+		icons_config.MergeMode = true;
+		icons_config.PixelSnapH = true;
+		icons_config.GlyphMinAdvanceX = icon_font_size;
+		io.Fonts->AddFontFromFileTTF(if_path.c_str(), icon_font_size, &icons_config, icons_ranges);
 
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return true;
@@ -299,36 +319,10 @@ namespace nhahn
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// custom titlebar
 		if (_window->hasCustomTitlebar())
 		{
-			ImGuiWindowFlags titlebar_flags =
-				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
-				| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-				| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar
-				| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollWithMouse;
-			const ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-			ImGui::SetNextWindowPos(viewport->WorkPos);
-			ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, 25.0f });
-			ImGui::SetNextWindowViewport(viewport->ID);
-
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 40.0f, 2.0f });
-			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
-
-			ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
-			ImGui::PopStyleVar(4);
-			ImGui::PopStyleColor(1);
-
-			//ImGui::Image(img_icon, ImVec2{ 1.0f, 1.0f });
-			//ImGui::SetWindowFontScale(0.75f);
-			//ImGui::PushFont(font_k12hl2);
-			ImGui::TextColored(ImVec4{ 1.0f,1.0f,1.0f,1.0f }, _window->getTitle().c_str());
-			//ImGui::PopFont();
-
-			ImGui::End();
+			renderCustomTitlebar();
 		}
 		
 		// Create the docking environment
@@ -368,6 +362,60 @@ namespace nhahn
 		if (_window->hasCustomTitlebar()) attemptDragWindow();
 	}
 
+	void UIContext::renderCustomTitlebar() const
+	{
+		// create titlebar
+		ImGuiWindowFlags titlebar_flags =
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollWithMouse;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, 25.0f });
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 2.0f });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.06f, 0.06f, 0.06f, 0.0f));
+
+		ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
+		ImGui::PopStyleVar(4);
+		ImGui::PopStyleColor(1);
+
+		// app logo
+		//ImGui::Image(img_icon, ImVec2{ 1.0f, 1.0f });
+
+		// app title 
+		//ImGui::SetWindowFontScale(0.75f);
+		//ImGui::PushFont(font_k12hl2);
+		ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), _window->getTitle().c_str());
+		//ImGui::PopFont();
+
+		// close, minimize & maximize buttons
+		float buttons_w = 100.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0,3 });
+
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
+		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 21,21 }))
+			switchMinimized();
+		ImGui::SameLine();
+		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 21,21 }))
+			switchMaximize();
+		ImGui::SameLine();
+		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 21,21 }))
+			switchMaximize();
+
+		ImGui::PopStyleVar(2);
+
+		ImGui::End();
+	}
+
 	void UIContext::postRender()
 	{
 		// Dear imgui Rendering
@@ -395,19 +443,56 @@ namespace nhahn
 		DBG("UI", DebugLevel::DEBUG, "UI context destroyed\n");
 	}
 
-	bool UIContext::disableTitlebar() {
+	bool UIContext::disableTitlebar() const {
 #	ifdef _WIN32
 		auto win = (GLFWwindow*)_window->getNativeWindow();
 		if (win)
 		{
 			disableTitlebarWin32(win);
-			DBG("UI", DebugLevel::DEBUG, "removed windows titlebar");
+			DBG("UI", DebugLevel::DEBUG, "removed windows titlebar\n");
 		}
 		return true;
 #	else
-		DBG("UI", DebugLevel::WARNING ,"NOT IMPLEMENTED: Disable Titlebar not implemented for this platform!");
+		DBG("UI", DebugLevel::WARNING ,"NOT IMPLEMENTED: Disable Titlebar not implemented for this platform!\n");
 		return false;
 #	endif
+	}
+
+	void UIContext::switchMaximize() const
+	{
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		int maximized = glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
+
+		if (maximized)
+		{
+			glfwRestoreWindow(window);
+		}
+		else
+		{
+			/*/
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+			glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+			glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+			glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+			glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+			//*/
+			glfwMaximizeWindow(window);
+		}
+	}
+
+	void UIContext::switchMinimized() const
+	{
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
+
+		if (minimized)
+			glfwRestoreWindow(window);
+		else
+			glfwIconifyWindow(window);
 	}
 
 	void UIContext::attemptDragWindow() {
@@ -439,7 +524,7 @@ namespace nhahn
 		}
 	}
 
-	void UIContext::setStyleDarkOrange()
+	void UIContext::setStyleDarkOrange() const
 	{
 		ImVec4* colors = ImGui::GetStyle().Colors;
 		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
