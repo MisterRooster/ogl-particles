@@ -13,6 +13,7 @@
 
 #include "ui/Window.h"
 #include "ui/IconFontDefines.h"
+#include "ui/CustomWidgets.h"
 #include "input/Input.h"
 #include "utility/Debug.h"
 #include "utility/FileSystem.h"
@@ -24,8 +25,10 @@
 #include <GLFW/glfw3native.h>
 
 #ifdef _WIN32
+#	include <windowsx.h>
 #	include <dwmapi.h>
 #endif // _WIN32
+
 
 namespace nhahn
 {
@@ -84,11 +87,14 @@ namespace nhahn
 	            // Remove the window's standard sizing border
 	            if (wParam == TRUE && lParam != NULL)
 	            {
-	                NCCALCSIZE_PARAMS* pParams = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-	                pParams->rgrc[0].top += 1;
-	                pParams->rgrc[0].right -= 1;
-	                pParams->rgrc[0].bottom -= 1;
-	                pParams->rgrc[0].left += 1;
+					if (!IsMaximized(hWnd))
+					{
+						NCCALCSIZE_PARAMS* pParams = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+						pParams->rgrc[0].top += 1;
+						pParams->rgrc[0].right -= 1;
+						pParams->rgrc[0].bottom -= 1;
+						pParams->rgrc[0].left += 1;
+					}
 	            }
 	            return 0;
 	        }
@@ -194,7 +200,9 @@ namespace nhahn
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		glfwWindowHint(GLFW_RESIZABLE, true);
+	#ifdef _WIN32 // for custom titlebar
 		glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+	#endif
 
 		auto gl_Window = glfwCreateWindow(window->getWidth(), window->getHeight(), window->getTitle().c_str(), NULL, NULL);
 		window->setNativeWindow(gl_Window);
@@ -223,6 +231,12 @@ namespace nhahn
 		}
 
 		glEnable(GL_DEPTH_TEST);
+
+		// center window
+		int pm_xpos, pm_ypos, pm_width, pm_height;
+		GLFWmonitor* primary = glfwGetPrimaryMonitor();
+		glfwGetMonitorWorkarea(primary, &pm_xpos, &pm_ypos, &pm_width, &pm_height);
+		glfwSetWindowPos(gl_Window, pm_xpos + pm_width / 2 - window->getWidth() / 2, pm_ypos + pm_height / 2 - window->getHeight() / 2);
 
 		DBG("UI", DebugLevel::DEBUG, "OpenGL context created successfully\n");
 		return true;
@@ -379,40 +393,36 @@ namespace nhahn
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 2.0f });
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.06f, 0.06f, 0.06f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.6f, 0.06f, 0.06f, 0.1f));
 
 		ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
 		ImGui::PopStyleVar(4);
 		ImGui::PopStyleColor(1);
 
 		// app logo
-		//ImGui::Image(img_icon, ImVec2{ 1.0f, 1.0f });
-
-		// app title 
-		//ImGui::SetWindowFontScale(0.75f);
-		//ImGui::PushFont(font_k12hl2);
-		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 6 });
-		ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), _window->getTitle().c_str());
-		//ImGui::PopStyleVar(1);
-		//ImGui::PopFont();
+		ImGui::PaddedText(ICON_CI_FLAME ICON_CI_SPARKLE, ImVec2(4.0f, 8.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
+		
+		// app title
+		ImGui::SameLine();
+		ImGui::PaddedText(_window->getTitle().c_str(), ImVec2(0.0f, 5.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
 
 		// close, minimize & maximize buttons
-		float buttons_w = 69.0f;
+		float buttons_w = 63.0f;
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 3 });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 5 });
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{ 0.5f, 1.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 2, 0 });
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
-		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 21, 21 }))
+		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 19, 19 }))
 			switchMinimized();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 21, 21 }))
+		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 19, 19 }))
 			switchMaximize();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 21, 21 }))
+		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 19, 19 }))
 			_window->_onClose();
 
 		ImGui::PopStyleVar(4);
@@ -513,9 +523,9 @@ namespace nhahn
 			glfwGetCursorPos(window, &c_xpos, &c_ypos);
 			glfwGetWindowPos(window, &w_xpos, &w_ypos);
 			if (
-				s_xpos >= 0 && s_xpos <= ((double)w_xsiz - 170) &&
+				s_xpos >= 0 && s_xpos <= ((double)w_xsiz - 70) &&
 				s_ypos >= 0 && s_ypos <= 25) {
-				glfwSetWindowPos(window, w_xpos + (c_xpos - s_xpos + 6), w_ypos + (c_ypos - s_ypos + 30));
+				glfwSetWindowPos(window, w_xpos + (c_xpos - s_xpos - 1), w_ypos + (c_ypos - s_ypos - 1));
 			}
 			if (
 				s_xpos >= ((double)w_xsiz - 15) && s_xpos <= ((double)w_xsiz) &&
