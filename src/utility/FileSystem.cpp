@@ -96,16 +96,6 @@ namespace nhahn
 		return size;
 	}
 
-	unsigned long FileSystem::fileSize(FILE* fp)
-	{
-		unsigned long prev = ftell(fp);
-		fseek(fp, 0, SEEK_END);
-		unsigned long size = ftell(fp);
-		fseek(fp, prev, SEEK_SET);
-
-		return size;
-	}
-
 	bool FileSystem::fileExists(const char* filepath)
 	{
 		struct stat buffer;
@@ -135,6 +125,16 @@ namespace nhahn
 
 namespace nhahn
 {
+	unsigned long FileSystem::fileSize(FILE* fp)
+	{
+		unsigned long prev = ftell(fp);
+		fseek(fp, 0, SEEK_END);
+		unsigned long size = ftell(fp);
+		fseek(fp, prev, SEEK_SET);
+
+		return size;
+	}
+
 	time_t FileSystem::fileLastChanged(const char* path)
 	{
 		HANDLE hFile;
@@ -225,8 +225,9 @@ namespace nhahn
 #elif NHAPP_PLATFORM == NHAPP_PLATFORM_LINUX
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <ctime>
+
 
 namespace nhahn
 {
@@ -243,6 +244,14 @@ namespace nhahn
 	#else
 		return stat.st_mtimespec.tv_sec;
 	#endif
+	}
+
+	time_t FileSystem::fileLastChanged(const char* path)
+	{
+		struct stat attr;
+		stat(path, &attr);
+		std::tm time = *std::localtime(&(attrib.st_ctime));
+		return mktime(&tm);
 	}
 
 	std::string FileSystem::getCurrentDirectory()
