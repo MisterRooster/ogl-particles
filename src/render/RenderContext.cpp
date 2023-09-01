@@ -394,7 +394,7 @@ namespace nhahn
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.6f, 0.06f, 0.06f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
 
 		ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
 		ImGui::PopStyleVar(4);
@@ -408,24 +408,27 @@ namespace nhahn
 		ImGui::PaddedText(_window->getTitle().c_str(), ImVec2(0.0f, 5.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
 
 		// close, minimize & maximize buttons
-		float buttons_w = 63.0f;
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+		float buttons_w = 75.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 5 });
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{ 0.5f, 1.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 2, 0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
-		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 19, 19 }))
+		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 25, 25 }))
 			switchMinimized();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 19, 19 }))
+		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 25, 25 }))
 			switchMaximize();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 19, 19 }))
+		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 25, 25 }))
 			_window->_onClose();
 
-		ImGui::PopStyleVar(4);
+		ImGui::PopStyleVar(5);
 
 		ImGui::End();
 	}
