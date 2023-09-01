@@ -123,7 +123,7 @@ namespace nhahn
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
-        //ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
+
         ImGui::SetNextWindowSize(ImVec2(_screenSize.x, _screenSize.y), ImGuiCond_FirstUseEver);
         ImGui::Begin("Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
@@ -303,7 +303,7 @@ namespace nhahn
 
             if (io.MouseDown[1])
             {
-                position = position + (position - pivot) * io.MouseDelta.y * 0.001f;
+                position = position + (position - pivot) * io.MouseDelta.y * 0.002f;
                 _cam->setCameraView(position, _cam->getLookAt(), _cam->getUpVector());
             }
         }        

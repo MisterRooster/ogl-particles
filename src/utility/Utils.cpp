@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include "imgui.h"
 
 
 namespace nhahn
@@ -149,17 +148,5 @@ namespace nhahn
 			str.erase(0, pos + delimiter.length());
 		}
 		return res;
-	}
-
-	void Utils::UIHelpMarker(const char* desc)
-	{
-		ImGui::TextDisabled("(?)");
-		if (ImGui::BeginItemTooltip())
-		{
-			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(desc);
-			ImGui::PopTextWrapPos();
-			ImGui::EndTooltip();
-		}
 	}
 }

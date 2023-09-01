@@ -69,7 +69,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 	}
 }
 

@@ -9,6 +9,8 @@
 
 // for use with https://github.com/microsoft/vscode-codicons/blob/main/dist/codicon.ttf
 
+namespace nhahn
+{
 #define ICON_MIN_CI 0xea60
 #define ICON_MAX_16_CI 0xec11
 #define ICON_MAX_CI 0xec11
@@ -539,3 +541,4 @@
 #define ICON_CI_SEND "\xee\xb0\x8f"	// U+ec0f
 #define ICON_CI_SPARKLE "\xee\xb0\x90"	// U+ec10
 #define ICON_CI_INSERT "\xee\xb0\x91"	// U+ec11
+}
