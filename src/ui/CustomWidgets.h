@@ -12,7 +12,7 @@
 
 namespace ImGui
 {
-	static void HelpMarker(const char* desc);
+	void HelpMarker(const char* desc);
 
-	static void PaddedText(const char* str, ImVec2 padding, ImVec4 col = ImVec4(1, 1, 1, 1));
+	void PaddedText(const char* str, ImVec2 padding, ImVec4 col = ImVec4(1, 1, 1, 1));
 }
