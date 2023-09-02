@@ -9,6 +9,8 @@
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "IconFontDefines.h"
 #include "render/BufferObject.h"
 #include "particles/ParticleRenderer.h"
 #include "particles/Effect.h"
@@ -116,7 +118,7 @@ namespace nhahn
 
     void SceneView::render(double dt)
     {
-        _currentFPS = (int)(1.0 / dt);
+        _currentFPS = (int)std::round(1.0 / dt);
 
         // scene Window
         ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
@@ -125,7 +127,7 @@ namespace nhahn
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
 
         ImGui::SetNextWindowSize(ImVec2(_screenSize.x, _screenSize.y), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Scene View", nullptr, screenflags);
+        ImGui::Begin(ICON_MDI_EYE " Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
         ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -188,7 +190,7 @@ namespace nhahn
         // add stats info
         {
             char statsLabel[64];
-            snprintf(statsLabel, sizeof statsLabel, "Particles: %i | FPS: %i",
+            snprintf(statsLabel, sizeof statsLabel, ICON_MDI_POUND ICON_MDI_SHIMMER " : %i | " ICON_MDI_SPEEDOMETER " : %i fps",
                 (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
             ImVec2 labelSize = ImGui::CalcTextSize(statsLabel);
 
@@ -223,8 +225,8 @@ namespace nhahn
 
         // add input info
         {
-            const char* inputlabel1 = "[LMB + move]: Turn Camera";
-            const char* inputlabel2 = "[RMB + move]: Zoom in/out";
+            const char* inputlabel1 = "[" ICON_MDI_MOUSE "LMB + " ICON_MDI_ARROW_ALL "] " ICON_MDI_ARROW_RIGHT_THIN " Turn Camera";
+            const char* inputlabel2 = "[" ICON_MDI_MOUSE "RMB + " ICON_MDI_ARROW_UP_DOWN "] " ICON_MDI_ARROW_RIGHT_THIN " Zoom in / out";
             ImVec2 labelSize1 = ImGui::CalcTextSize(inputlabel1);
             ImVec2 labelSize2 = ImGui::CalcTextSize(inputlabel2);
 

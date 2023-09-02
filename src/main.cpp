@@ -11,6 +11,7 @@
 #include "Application.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
+#include "ui/IconFontDefines.h"
 #include "utility/Debug.h"
 #include "utility/FileSystem.h"
 #include "utility/Utils.h"
@@ -46,8 +47,8 @@ namespace nhahn
 			ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetMainViewport()->Size);
 
 			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.25f, nullptr, &dockSpaceId);
-			ImGui::DockBuilderDockWindow("Properties", dock_id_left);
-			ImGui::DockBuilderDockWindow("Scene View", dockSpaceId);
+			ImGui::DockBuilderDockWindow(ICON_MDI_COGS " Properties", dock_id_left);
+			ImGui::DockBuilderDockWindow(ICON_MDI_EYE " Scene View", dockSpaceId);
 			ImGui::DockBuilderFinish(dockSpaceId);
 			DBG("UI", DebugLevel::DEBUG, "docked child windows to main dockspace\n");
 
@@ -69,6 +70,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
+		ImGui::ShowDemoWindow();
 	}
 }
 

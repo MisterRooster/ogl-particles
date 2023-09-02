@@ -7,11 +7,14 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "CustomWidgets.h"
 
+#include "IconFontDefines.h"
+
+
 namespace ImGui
 {
 	void HelpMarker(const char* desc)
 	{
-		TextDisabled("(?)");
+		TextDisabled(ICON_MDI_HELP_CIRCLE);
 		if (BeginItemTooltip())
 		{
 			PushTextWrapPos(GetFontSize() * 35.0f);

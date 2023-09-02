@@ -109,41 +109,45 @@ namespace nhahn
 	        case WM_NCHITTEST:
 	        {
 	            // Expand the hit test area for resizing
-	            const int borderWidth = 4; // Adjust this value to control the hit test area size
-	
-	            POINTS mousePos = MAKEPOINTS(lParam);
-	            POINT clientMousePos = { mousePos.x, mousePos.y };
-	            ScreenToClient(hWnd, &clientMousePos);
-	
-	            RECT windowRect;
-	            GetClientRect(hWnd, &windowRect);
-	
-	            if (clientMousePos.y >= windowRect.bottom - borderWidth)
-	            {
-	                if (clientMousePos.x <= borderWidth)
-	                    return HTBOTTOMLEFT;
-	                else if (clientMousePos.x >= windowRect.right - borderWidth)
-	                    return HTBOTTOMRIGHT;
-	                else
-	                    return HTBOTTOM;
-	            }
-	            else if (clientMousePos.y <= borderWidth)
-	            {
-	                if (clientMousePos.x <= borderWidth)
-	                    return HTTOPLEFT;
-	                else if (clientMousePos.x >= windowRect.right - borderWidth)
-	                    return HTTOPRIGHT;
-	                else
-	                    return HTTOP;
-	            }
-	            else if (clientMousePos.x <= borderWidth)
-	            {
-	                return HTLEFT;
-	            }
-	            else if (clientMousePos.x >= windowRect.right - borderWidth)
-	            {
-	                return HTRIGHT;
-	            }
+	            int borderWidth = 4; // Adjust this value to control the hit test area size
+
+				if (!IsMaximized(hWnd))
+				{
+
+					POINTS mousePos = MAKEPOINTS(lParam);
+					POINT clientMousePos = { mousePos.x, mousePos.y };
+					ScreenToClient(hWnd, &clientMousePos);
+
+					RECT windowRect;
+					GetClientRect(hWnd, &windowRect);
+
+					if (clientMousePos.y >= windowRect.bottom - borderWidth)
+					{
+						if (clientMousePos.x <= borderWidth)
+							return HTBOTTOMLEFT;
+						else if (clientMousePos.x >= windowRect.right - borderWidth)
+							return HTBOTTOMRIGHT;
+						else
+							return HTBOTTOM;
+					}
+					else if (clientMousePos.y <= borderWidth)
+					{
+						if (clientMousePos.x <= borderWidth)
+							return HTTOPLEFT;
+						else if (clientMousePos.x >= windowRect.right - borderWidth)
+							return HTTOPRIGHT;
+						else
+							return HTTOP;
+					}
+					else if (clientMousePos.x <= borderWidth)
+					{
+						return HTLEFT;
+					}
+					else if (clientMousePos.x >= windowRect.right - borderWidth)
+					{
+						return HTRIGHT;
+					}
+				}
 	
 	            break;
 	        }
@@ -322,26 +326,27 @@ namespace nhahn
 
 		// load custom font
 		std::string df_path = FileSystem::getModuleDirectory() + "data\\fonts\\Ubuntu-Regular.ttf";
-		std::string if_path = FileSystem::getModuleDirectory() + "data\\fonts\\codicon.ttf";
+		std::string if_path = FileSystem::getModuleDirectory() + "data\\fonts\\MaterialDesignIconsDesktop.ttf";
 
 		float base_font_size = 13.0f;
-		float icon_font_size = base_font_size * 1.0f;
 		ImFontConfig df_config;
 		df_config.RasterizerMultiply = 1.05f;
 		io.Fonts->AddFontFromFileTTF(df_path.c_str(), base_font_size, &df_config);
 
 		// merge in icons from Font Awesome
-		static const ImWchar icons_ranges[] = { ICON_MIN_CI, ICON_MAX_16_CI, 0 };
+		static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
+		float icon_font_size = base_font_size * 1.0f;
 		ImFontConfig icons_config;
 		icons_config.MergeMode = true;
 		icons_config.PixelSnapH = true;
+		//icons_config.GlyphOffset = ImVec2(0.0f,2.5f);
 		icons_config.GlyphMinAdvanceX = icon_font_size;
 		io.Fonts->AddFontFromFileTTF(if_path.c_str(), icon_font_size, &icons_config, icons_ranges);
 
 		// load logo image
 		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
 		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
-		ASSERT(_logo_id);
+		ASSERT(_logo_id, "Failed to create logo texture!");
 
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return true;
@@ -440,16 +445,17 @@ namespace nhahn
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
-		if (ImGui::Button(ICON_CI_CHROME_MINIMIZE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, ImVec2{ 25, 25 }))
 			switchMinimized();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_MAXIMIZE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(ICON_MDI_WINDOW_MAXIMIZE, ImVec2{ 25, 25 }))
 			switchMaximize();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_CI_CHROME_CLOSE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, ImVec2{ 25, 25 }))
 			_window->_onClose();
 
 		ImGui::PopStyleVar(5);
+		ImGui::PopStyleColor(1);
 
 		ImGui::End();
 	}
@@ -520,30 +526,41 @@ namespace nhahn
 
 	void UIContext::attemptDragWindow() {
 		auto window = (GLFWwindow*)_window->getNativeWindow();
+		bool is_maximized = false;
 
-		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 0) {
-			glfwGetCursorPos(window, &_cursor_start_xpos, &_cursor_start_ypos);
-			glfwGetWindowSize(window, &_window_xsiz, &_window_ysiz);
-			_window_dragState = 1;
-		}
-		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 1) {
-			double c_xpos, c_ypos;
-			int w_xpos, w_ypos;
-			glfwGetCursorPos(window, &c_xpos, &c_ypos);
-			glfwGetWindowPos(window, &w_xpos, &w_ypos);
-			if (
-				_cursor_start_xpos >= 0 && _cursor_start_xpos <= ((double)_window_xsiz - 70) &&
-				_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25) {
-				glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos - 1), w_ypos + (c_ypos - _cursor_start_ypos - 1));
+	#ifdef _WIN32
+		HWND native_win = glfwGetWin32Window(window);
+		is_maximized = IsMaximized(native_win);
+	#endif
+
+		if (!is_maximized)
+		{
+			if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 0) {
+				glfwGetCursorPos(window, &_cursor_start_xpos, &_cursor_start_ypos);
+				glfwGetWindowSize(window, &_window_xsiz, &_window_ysiz);
+				_window_dragState = 1;
 			}
-			if (
-				_cursor_start_xpos >= ((double)_window_xsiz - 15) && _cursor_start_xpos <= ((double)_window_xsiz) &&
-				_cursor_start_ypos >= ((double)_window_ysiz - 15) && _cursor_start_ypos <= ((double)_window_ysiz)) {
-				glfwSetWindowSize(window, _window_xsiz + (c_xpos - _cursor_start_xpos), _window_ysiz + (c_ypos - _cursor_start_ypos));
+			if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 1) {
+				double c_xpos, c_ypos;
+				int w_xpos, w_ypos;
+				glfwGetCursorPos(window, &c_xpos, &c_ypos);
+				glfwGetWindowPos(window, &w_xpos, &w_ypos);
+				if (_cursor_start_xpos >= 0 && _cursor_start_xpos <= ((double)_window_xsiz - 70) &&
+					_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25) {
+
+					if (is_maximized)
+						glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos), w_ypos + (c_ypos - _cursor_start_ypos));
+					else
+						glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos - 1), w_ypos + (c_ypos - _cursor_start_ypos - 1));
+				}
+				if (_cursor_start_xpos >= ((double)_window_xsiz - 15) && _cursor_start_xpos <= ((double)_window_xsiz) &&
+					_cursor_start_ypos >= ((double)_window_ysiz - 15) && _cursor_start_ypos <= ((double)_window_ysiz)) {
+					glfwSetWindowSize(window, _window_xsiz + (c_xpos - _cursor_start_xpos), _window_ysiz + (c_ypos - _cursor_start_ypos));
+				}
 			}
-		}
-		if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && _window_dragState == 1) {
-			_window_dragState = 0;
+			if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && _window_dragState == 1) {
+				_window_dragState = 0;
+			}
 		}
 	}
 
