@@ -219,6 +219,19 @@ namespace nhahn
 		glfwSetScrollCallback(gl_Window, on_scroll_callback);
 		glfwSetWindowSizeCallback(gl_Window, on_window_size_callback);
 		glfwSetWindowCloseCallback(gl_Window, on_window_close_callback);
+
+		// application icons
+		std::string icon32_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		std::string icon64_path = FileSystem::getModuleDirectory() + "data\\icons\\logo64.png";
+		std::string icon96_path = FileSystem::getModuleDirectory() + "data\\icons\\logo96.png";
+
+		GLFWimage icons[3];
+		int i32_ch, i64_ch, i96_ch;
+		icons[0].pixels = static_cast<unsigned char*>(FileSystem::loadImageFile(icon32_path.c_str(), &icons[0].width, &icons[0].height, &i32_ch, 4));
+		icons[1].pixels = static_cast<unsigned char*>(FileSystem::loadImageFile(icon64_path.c_str(), &icons[1].width, &icons[1].height, &i64_ch, 4));
+		icons[2].pixels = static_cast<unsigned char*>(FileSystem::loadImageFile(icon96_path.c_str(), &icons[2].width, &icons[2].height, &i96_ch, 4));
+		glfwSetWindowIcon(gl_Window, 3, icons);
+
 		glfwMakeContextCurrent(gl_Window);
 		glfwSwapInterval(0); // use 1 to enable vsync
 
@@ -305,8 +318,8 @@ namespace nhahn
 		}
 
 		// load custom font
-		std::string df_path = FileSystem::getModuleDirectory() + "data\\Ubuntu-Regular.ttf";
-		std::string if_path = FileSystem::getModuleDirectory() + "data\\codicon.ttf";
+		std::string df_path = FileSystem::getModuleDirectory() + "data\\fonts\\Ubuntu-Regular.ttf";
+		std::string if_path = FileSystem::getModuleDirectory() + "data\\fonts\\codicon.ttf";
 
 		float base_font_size = 13.0f;
 		float icon_font_size = base_font_size * 1.0f;
@@ -481,24 +494,9 @@ namespace nhahn
 		int maximized = glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
 
 		if (maximized)
-		{
 			glfwRestoreWindow(window);
-		}
 		else
-		{
-			/*/
-			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-			glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-			glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-			glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-			glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-			glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-			//*/
 			glfwMaximizeWindow(window);
-		}
 	}
 
 	void UIContext::switchMinimized() const
