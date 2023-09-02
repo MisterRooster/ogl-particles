@@ -48,7 +48,9 @@ if (WIN32)
 		# Prevents Windows.h from defining min/max as macros 
 		NOMINMAX
 		_CRT_SECURE_NO_WARNINGS
-		GLEW_STATIC)   
+		GLEW_STATIC
+		# customize ImGui implementation
+		IMGUI_USER_CONFIG="thirdparty/oglp_imgui_config.h")   
 endif()
 
 # Compiler flags
