@@ -55,7 +55,7 @@ uses version 9.9.8 - [*commit (47585fd)*](https://github.com/g-truc/glm/tree/475
 
 - src/thirdparty/**stb_image.h** → Single file image loader
 [https://github.com/nothings/stb](https://github.com/nothings/stb) - [*License*](https://github.com/nothings/stb/blob/5736b15f7ea0ffb08dd38af21067c314d6a3aae9/LICENSE)<br>
-uses version 2.28 - [*commit (5736b15)](https://github.com/nothings/stb/tree/5736b15f7ea0ffb08dd38af21067c314d6a3aae9)
+uses version 2.28 - [*commit (5736b15)*](https://github.com/nothings/stb/tree/5736b15f7ea0ffb08dd38af21067c314d6a3aae9)
 
 The following resources are used:
 
@@ -67,9 +67,9 @@ The following resources are used:
  [OpenGameArt](https://opengameart.org/)<br>
  [https://opengameart.org/content/particle-pack-80-sprites](https://opengameart.org/content/particle-pack-80-sprites)
 
-- data/**fonts** → Regular Font and Icon Font by Microsoft and Google <br>
-[**codicon.ttf**](https://github.com/microsoft/vscode-codicons/blob/main/dist/codicon.ttf) - [*License*](https://github.com/microsoft/vscode-codicons/blob/main/LICENSE), 
-[**Ubuntu-Regular.ttf**](https://fonts.google.com/specimen/Ubuntu) - [*License*](https://ubuntu.com/legal/font-licence)
+- data/**fonts** → Regular Font and Icon Font by Microsoft and [Pictogrammers](https://pictogrammers.com/) <br>
+[**Ubuntu-Regular.ttf**](https://fonts.google.com/specimen/Ubuntu) - [*License*](https://ubuntu.com/legal/font-licence), 
+[**MaterialDesignIconsDesktop.ttf**](https://github.com/Templarian/MaterialDesign-Font) - [*License*](https://pictogrammers.com/docs/general/license/)
 
 -----
 Copyright (c) 2023 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
