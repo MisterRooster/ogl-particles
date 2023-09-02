@@ -404,6 +404,14 @@ namespace nhahn
 
 	void UIContext::renderCustomTitlebar() const
 	{
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		bool is_maximized = false;
+
+#ifdef _WIN32
+		HWND native_win = glfwGetWin32Window(window);
+		is_maximized = IsMaximized(native_win);
+#endif
+
 		// create titlebar
 		ImGuiWindowFlags titlebar_flags =
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
@@ -448,7 +456,7 @@ namespace nhahn
 		if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, ImVec2{ 25, 25 }))
 			switchMinimized();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_MDI_WINDOW_MAXIMIZE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(is_maximized ? ICON_MDI_WINDOW_RESTORE : ICON_MDI_WINDOW_MAXIMIZE, ImVec2{ 25, 25 }))
 			switchMaximize();
 		ImGui::SameLine();
 		if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, ImVec2{ 25, 25 }))
