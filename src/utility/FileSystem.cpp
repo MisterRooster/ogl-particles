@@ -24,9 +24,6 @@
 #	define NHAPP_PLATFORM NHAPP_PLATFORM_LINUX
 #endif
 
-
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG 
 #include "thirdparty/stb_image.h"
 
 
@@ -99,30 +96,21 @@ namespace nhahn
 		return size;
 	}
 
-	unsigned long FileSystem::fileSize(FILE* fp)
-	{
-		unsigned long prev = ftell(fp);
-		fseek(fp, 0, SEEK_END);
-		unsigned long size = ftell(fp);
-		fseek(fp, prev, SEEK_SET);
-
-		return size;
-	}
-
 	bool FileSystem::fileExists(const char* filepath)
 	{
 		struct stat buffer;
 		return (stat(filepath, &buffer) == 0);
 	}
 
-	unsigned char* FileSystem::loadImageFile(const char* filepath, int* w, int* h,
+	void* FileSystem::loadImageFile(const char* filepath, int* w, int* h,
 		int* channels, int desired_channels = 0)
 	{
-		unsigned char* texData = stbi_load(filepath, w, h, channels, desired_channels);
-		if (texData == NULL) {
+		void *texData = stbi_load(filepath, w, h, channels, desired_channels);
+		if (texData == nullptr) {
 			FAIL("Unable to load image '%s', Error: %s\n", filepath, stbi_failure_reason());
 			return NULL;
 		}
+		//stbi_image_free(texData);
 		return texData;
 	}
 }
@@ -137,6 +125,16 @@ namespace nhahn
 
 namespace nhahn
 {
+	unsigned long FileSystem::fileSize(FILE* fp)
+	{
+		unsigned long prev = ftell(fp);
+		fseek(fp, 0, SEEK_END);
+		unsigned long size = ftell(fp);
+		fseek(fp, prev, SEEK_SET);
+
+		return size;
+	}
+
 	time_t FileSystem::fileLastChanged(const char* path)
 	{
 		HANDLE hFile;
@@ -227,8 +225,9 @@ namespace nhahn
 #elif NHAPP_PLATFORM == NHAPP_PLATFORM_LINUX
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <ctime>
+
 
 namespace nhahn
 {
@@ -245,6 +244,14 @@ namespace nhahn
 	#else
 		return stat.st_mtimespec.tv_sec;
 	#endif
+	}
+
+	time_t FileSystem::fileLastChanged(const char* path)
+	{
+		struct stat attr;
+		stat(path, &attr);
+		std::tm time = *std::localtime(&(attrib.st_ctime));
+		return mktime(&tm);
 	}
 
 	std::string FileSystem::getCurrentDirectory()

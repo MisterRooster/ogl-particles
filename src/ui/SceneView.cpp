@@ -9,6 +9,8 @@
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "IconFontDefines.h"
 #include "render/BufferObject.h"
 #include "particles/ParticleRenderer.h"
 #include "particles/Effect.h"
@@ -47,7 +49,7 @@ namespace nhahn
         : _srcD(t), _screenSize(400, 225)
     {
         _srcSize = glm::vec2(t->width(), t->height());
-        std::string path = nhahn::FileSystem::getModuleDirectory() + "data/shaders/";
+        std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
 
         // global gl stats
         glEnable(GL_DEPTH_TEST);
@@ -87,12 +89,15 @@ namespace nhahn
         delete[] data;
 
         // particle texture
-        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data/particle.png";
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\sprites\\scorch_02.png";
         
         int textureW, textureH, textureChannels;
-        unsigned char* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 0);
+        void* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 4);
 
+        // create buffer object
         _particleTex = std::make_unique<Texture>(TEXTURE_2D, textureW, textureH);
+        _particleTex->setFormat(TEXEL_FLOAT, 4, 1);
+        _particleTex->init();
         _particleTex->copy(textureData);
         delete[] textureData;
 
@@ -113,16 +118,16 @@ namespace nhahn
 
     void SceneView::render(double dt)
     {
-        _currentFPS = (int)(1.0 / dt);
+        _currentFPS = (int)std::round(1.0 / dt);
 
         // scene Window
         ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
-        //ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
+
         ImGui::SetNextWindowSize(ImVec2(_screenSize.x, _screenSize.y), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Scene View", nullptr, screenflags);
+        ImGui::Begin(ICON_MDI_EYE " Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
         ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -158,7 +163,11 @@ namespace nhahn
 
             _particleTex->bindAny();
             _rt->selectAttachmentList(1, _rt->attachTextureAny(*_screen));
-            glEnable(GL_PROGRAM_POINT_SIZE);
+            glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+            glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+            glPointSize(40.0f);
+            glEnable(GL_POINT_SPRITE);
+            glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
             _particleProg->bind();
             _particleProg->setUniformI("tex", _particleTex->boundUnit());
             _particleProg->setUniformMat("modelViewMat", _cam->getViewMatrix(), false);
@@ -178,51 +187,80 @@ namespace nhahn
         if (ImGui::IsItemHovered())
             ImGui::SetMouseCursor(7);
 
-        // add fps info to corner
+        // add stats info
         {
-            ImVec2 newPos;
-            char btnLabel[64];
-            snprintf(btnLabel, sizeof btnLabel, "Particles: %i | FPS: %i",
+            char statsLabel[64];
+            snprintf(statsLabel, sizeof statsLabel, ICON_MDI_POUND ICON_MDI_SHIMMER " : %i | " ICON_MDI_SPEEDOMETER " : %i fps",
                 (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
-            newPos.x = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnLabel).x - 18.0;
-            ImGui::SameLine();
-            newPos.y = ImGui::GetCursorPosY() + 10.0;
-            ImGui::SetCursorPos(newPos);
+            ImVec2 labelSize = ImGui::CalcTextSize(statsLabel);
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::Button(btnLabel);
-            ImGui::PopStyleColor(3);
+            ImGuiWindowFlags statsInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
+                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+            const float statsInfo_margin = 10.0f;
+            const ImVec2 statsInfo_pad = ImVec2(10.0f, 4.0f);
+            
+            ImVec2 statsInfo_size = ImVec2(labelSize.x + statsInfo_pad.x * 2, labelSize.y + statsInfo_pad.y * 2);
+
+            ImGui::SameLine();
+            ImVec2 statsInfo_pos;
+            statsInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - statsInfo_margin;
+            statsInfo_pos.y = ImGui::GetCursorScreenPos().y + statsInfo_margin;
+
+            ImGui::SetNextWindowPos(statsInfo_pos, ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            statsInfo_flags |= ImGuiWindowFlags_NoMove;
+
+            ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, statsInfo_pad);
+
+            if (ImGui::BeginChild("StatsInfo", statsInfo_size, true, statsInfo_flags))
+            {
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), statsLabel);
+            }
+            ImGui::PopStyleVar(2);
+            ImGui::EndChild();
         }
 
         // add input info
-        static bool info_open = true;
         {
-            ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize |
-                ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
-            const float inputInfo_pad = 10.0f;
+            const char* inputlabel1 = "[" ICON_MDI_MOUSE "LMB + " ICON_MDI_ARROW_ALL "] " ICON_MDI_ARROW_RIGHT_THIN " Turn Camera";
+            const char* inputlabel2 = "[" ICON_MDI_MOUSE "RMB + " ICON_MDI_ARROW_UP_DOWN "] " ICON_MDI_ARROW_RIGHT_THIN " Zoom in / out";
+            ImVec2 labelSize1 = ImGui::CalcTextSize(inputlabel1);
+            ImVec2 labelSize2 = ImGui::CalcTextSize(inputlabel2);
+
+            ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
+                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+            const float inputInfo_margin = 10.0f;
+            const ImVec2 inputInfo_pad = ImVec2(10.0f, 4.0f);
+
+            ImVec2 inputInfo_size = ImVec2(std::max(labelSize1.x, labelSize2.x) + inputInfo_pad.x * 2,
+                labelSize1.y + labelSize2.y + inputInfo_pad.y * 2 + 9.0f);
 
             ImVec2 inputInfo_pos;
-            ImVec2 inputInfo_size = ImVec2(200, 50);
-            inputInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - inputInfo_pad;
-            inputInfo_pos.y = ImGui::GetWindowPos().y + ImGui::GetWindowHeight()- inputInfo_pad;
+            inputInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - inputInfo_margin;
+            inputInfo_pos.y = ImGui::GetWindowPos().y + ImGui::GetWindowHeight() - inputInfo_margin;
+
             ImGui::SetNextWindowPos(inputInfo_pos, ImGuiCond_Always, ImVec2(1.0f, 1.0f));
             inputInfo_flags |= ImGuiWindowFlags_NoMove;
 
-            ImGui::SetNextWindowBgAlpha(0.3f); // Transparent background
+            ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
 
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 5.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 8.0f));
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, inputInfo_pad);
 
             if (ImGui::BeginChild("InputInfo", inputInfo_size, true, inputInfo_flags))
             {
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "[LMB + move]: Turn Camera");
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel1);
+                ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
                 ImGui::Separator();
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "[RMB + move]: Zoom in/out");
+                ImGui::PopStyleColor(1);
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel2);
             }
-            ImGui::PopStyleVar(3);
+            ImGui::PopStyleVar(2);
             ImGui::EndChild(); 
         }
 
@@ -267,7 +305,7 @@ namespace nhahn
 
             if (io.MouseDown[1])
             {
-                position = position + (position - pivot) * io.MouseDelta.y * 0.001f;
+                position = position + (position - pivot) * io.MouseDelta.y * 0.002f;
                 _cam->setCameraView(position, _cam->getLookAt(), _cam->getUpVector());
             }
         }        

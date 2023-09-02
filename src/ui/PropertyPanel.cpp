@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "imgui.h"
+#include "ui/IconFontDefines.h"
 #include "utility/Debug.h"
 
 
@@ -36,7 +37,7 @@ namespace nhahn
     void PropertyPanel::render()
     {
         ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Properties"))
+        if (ImGui::Begin(ICON_MDI_COGS " Properties"))
         {
             ImGuiStyle& style = ImGui::GetStyle();
             float w = ImGui::CalcItemWidth();
@@ -45,7 +46,7 @@ namespace nhahn
             ImGui::SeparatorText("Scene:");
 
             ImGui::AlignTextToFramePadding();
-            ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Current Effect:");
+            ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), ICON_MDI_SHIMMER " Current Effect :");
 
             ImGui::SameLine();
             ImGui::PushItemWidth(w - spacing * 2.0f);

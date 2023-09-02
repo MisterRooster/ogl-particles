@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------------------------*\
+﻿/*------------------------------------------------------------------------------------------------*\
 | ogl-particles
 |
 | Copyright (c) 2023 MisterRooster (github.com/MisterRooster). All rights reserved.
@@ -12,12 +12,25 @@
 #include "backends/imgui_impl_opengl3.h"
 
 #include "ui/Window.h"
+#include "ui/IconFontDefines.h"
+#include "ui/CustomWidgets.h"
+#include "render/Texture.h"
 #include "input/Input.h"
 #include "utility/Debug.h"
+#include "utility/FileSystem.h"
+
+#include "thirdparty/stb_image.h"
 
 #include "GL/glew.h"
 #define GLFW_INCLUDE_GLEXT
-#include "GLFW/glfw3.h"
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
+#ifdef _WIN32
+#	include <windowsx.h>
+#	include <dwmapi.h>
+#endif // _WIN32
 
 
 namespace nhahn
@@ -65,6 +78,117 @@ namespace nhahn
 		FAIL("Error: %s\n", description);
 	}
 
+#ifdef _WIN32
+	WNDPROC original_proc;
+
+	LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+	    switch (uMsg)
+	    {
+	        case WM_NCCALCSIZE:
+	        {
+	            // Remove the window's standard sizing border
+	            if (wParam == TRUE && lParam != NULL)
+	            {
+					if (!IsMaximized(hWnd))
+					{
+						NCCALCSIZE_PARAMS* pParams = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+						pParams->rgrc[0].top += 1;
+						pParams->rgrc[0].right -= 1;
+						pParams->rgrc[0].bottom -= 1;
+						pParams->rgrc[0].left += 1;
+					}
+	            }
+	            return 0;
+	        }
+	        case WM_NCPAINT:
+	        {
+	            // Prevent the non-client area from being painted
+	            return 0;
+	        }
+	        case WM_NCHITTEST:
+	        {
+	            // Expand the hit test area for resizing
+	            int borderWidth = 4; // Adjust this value to control the hit test area size
+
+				if (!IsMaximized(hWnd))
+				{
+
+					POINTS mousePos = MAKEPOINTS(lParam);
+					POINT clientMousePos = { mousePos.x, mousePos.y };
+					ScreenToClient(hWnd, &clientMousePos);
+
+					RECT windowRect;
+					GetClientRect(hWnd, &windowRect);
+
+					if (clientMousePos.y >= windowRect.bottom - borderWidth)
+					{
+						if (clientMousePos.x <= borderWidth)
+							return HTBOTTOMLEFT;
+						else if (clientMousePos.x >= windowRect.right - borderWidth)
+							return HTBOTTOMRIGHT;
+						else
+							return HTBOTTOM;
+					}
+					else if (clientMousePos.y <= borderWidth)
+					{
+						if (clientMousePos.x <= borderWidth)
+							return HTTOPLEFT;
+						else if (clientMousePos.x >= windowRect.right - borderWidth)
+							return HTTOPRIGHT;
+						else
+							return HTTOP;
+					}
+					else if (clientMousePos.x <= borderWidth)
+					{
+						return HTLEFT;
+					}
+					else if (clientMousePos.x >= windowRect.right - borderWidth)
+					{
+						return HTRIGHT;
+					}
+				}
+	
+	            break;
+	        }
+			case WM_NCACTIVATE:
+			{
+				// Prevent non-client area from being redrawn during window activation
+				return TRUE;
+			}
+	    }
+	    
+	    return CallWindowProc(original_proc, hWnd, uMsg, wParam, lParam);
+	}
+
+	void disableTitlebarWin32(GLFWwindow* window)
+	{
+		HWND hWnd = glfwGetWin32Window(window);
+
+		LONG_PTR lStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+		lStyle |= WS_THICKFRAME;
+		lStyle &= ~WS_CAPTION;
+		SetWindowLongPtr(hWnd, GWL_STYLE, lStyle);
+
+		// Set the window shape and rounded corners
+		DWMNCRENDERINGPOLICY policy = DWMNCRP_ENABLED;
+		DwmSetWindowAttribute(hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof(policy));
+
+		// Extend the frame into the client area
+		MARGINS margins = { -1 };
+		DwmExtendFrameIntoClientArea(hWnd, &margins);
+
+		RECT windowRect;
+		GetWindowRect(hWnd, &windowRect);
+		int width = windowRect.right - windowRect.left;
+		int height = windowRect.bottom - windowRect.top;
+
+		original_proc = (WNDPROC)GetWindowLongPtr(hWnd, GWLP_WNDPROC);
+		(WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc));
+		SetWindowPos(hWnd, NULL, 0, 0, width, height, SWP_FRAMECHANGED | SWP_NOMOVE);
+	}
+#endif // _WIN32
+
 	//----------------------------------------------------------------------------------------------
 
 	bool GLContext::init(Window* window)
@@ -83,6 +207,9 @@ namespace nhahn
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		glfwWindowHint(GLFW_RESIZABLE, true);
+	#ifdef _WIN32 // for custom titlebar
+		glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+	#endif
 
 		auto gl_Window = glfwCreateWindow(window->getWidth(), window->getHeight(), window->getTitle().c_str(), NULL, NULL);
 		window->setNativeWindow(gl_Window);
@@ -99,6 +226,19 @@ namespace nhahn
 		glfwSetScrollCallback(gl_Window, on_scroll_callback);
 		glfwSetWindowSizeCallback(gl_Window, on_window_size_callback);
 		glfwSetWindowCloseCallback(gl_Window, on_window_close_callback);
+
+		// application icons
+		std::string icon32_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		std::string icon64_path = FileSystem::getModuleDirectory() + "data\\icons\\logo64.png";
+		std::string icon96_path = FileSystem::getModuleDirectory() + "data\\icons\\logo96.png";
+
+		GLFWimage icons[3];
+		int i32_ch, i64_ch, i96_ch;
+		icons[0].pixels = static_cast<unsigned char*>(FileSystem::loadImageFile(icon32_path.c_str(), &icons[0].width, &icons[0].height, &i32_ch, 4));
+		icons[1].pixels = static_cast<unsigned char*>(FileSystem::loadImageFile(icon64_path.c_str(), &icons[1].width, &icons[1].height, &i64_ch, 4));
+		icons[2].pixels = static_cast<unsigned char*>(FileSystem::loadImageFile(icon96_path.c_str(), &icons[2].width, &icons[2].height, &i96_ch, 4));
+		glfwSetWindowIcon(gl_Window, 3, icons);
+
 		glfwMakeContextCurrent(gl_Window);
 		glfwSwapInterval(0); // use 1 to enable vsync
 
@@ -111,6 +251,12 @@ namespace nhahn
 		}
 
 		glEnable(GL_DEPTH_TEST);
+
+		// center window
+		int pm_xpos, pm_ypos, pm_width, pm_height;
+		GLFWmonitor* primary = glfwGetPrimaryMonitor();
+		glfwGetMonitorWorkarea(primary, &pm_xpos, &pm_ypos, &pm_width, &pm_height);
+		glfwSetWindowPos(gl_Window, pm_xpos + pm_width / 2 - window->getWidth() / 2, pm_ypos + pm_height / 2 - window->getHeight() / 2);
 
 		DBG("UI", DebugLevel::DEBUG, "OpenGL context created successfully\n");
 		return true;
@@ -147,7 +293,7 @@ namespace nhahn
 		__super::init(window);
 
 		// GL 3.0 + GLSL 410
-		const char* glsl_version = "#version 410";
+		const char* glsl_version = "#version 440";
 
 		// setup dear imgui context
 		IMGUI_CHECKVERSION();
@@ -174,9 +320,33 @@ namespace nhahn
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			//style.WindowRounding = 0.0f;
-			//style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+
+		// load custom font
+		std::string df_path = FileSystem::getModuleDirectory() + "data\\fonts\\Ubuntu-Regular.ttf";
+		std::string if_path = FileSystem::getModuleDirectory() + "data\\fonts\\MaterialDesignIconsDesktop.ttf";
+
+		float base_font_size = 13.0f;
+		ImFontConfig df_config;
+		df_config.RasterizerMultiply = 1.05f;
+		io.Fonts->AddFontFromFileTTF(df_path.c_str(), base_font_size, &df_config);
+
+		// merge in icons from Font Awesome
+		static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
+		float icon_font_size = base_font_size * 1.0f;
+		ImFontConfig icons_config;
+		icons_config.MergeMode = true;
+		icons_config.PixelSnapH = true;
+		//icons_config.GlyphOffset = ImVec2(0.0f,2.5f);
+		icons_config.GlyphMinAdvanceX = icon_font_size;
+		io.Fonts->AddFontFromFileTTF(if_path.c_str(), icon_font_size, &icons_config, icons_ranges);
+
+		// load logo image
+		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
+		ASSERT(_logo_id, "Failed to create logo texture!");
 
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return true;
@@ -189,16 +359,33 @@ namespace nhahn
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// custom titlebar
+		if (_window->hasCustomTitlebar())
+		{
+			renderCustomTitlebar();
+		}
+		
 		// Create the docking environment
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoBackground;
+		ImGuiWindowFlags windowFlags =
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		if (_window->hasCustomTitlebar())
+		{
+			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + 25.0f));
+			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - 25.0f));
+			ImGui::SetNextWindowViewport(viewport->ID);
+		}
+		else
+		{
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
+			ImGui::SetNextWindowViewport(viewport->ID);
+		}
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -206,8 +393,78 @@ namespace nhahn
 
 		ImGui::Begin("MainDockspaceWindow", nullptr, windowFlags);
 		ImGui::PopStyleVar(3);
+
 		ImGuiID dockSpaceId = ImGui::GetID("MainDockspace");
 		ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+		ImGui::End();
+
+		if (_window->hasCustomTitlebar()) attemptDragWindow();
+	}
+
+	void UIContext::renderCustomTitlebar() const
+	{
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		bool is_maximized = false;
+
+#ifdef _WIN32
+		HWND native_win = glfwGetWin32Window(window);
+		is_maximized = IsMaximized(native_win);
+#endif
+
+		// create titlebar
+		ImGuiWindowFlags titlebar_flags =
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollWithMouse;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, 25.0f });
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 0.06f, 0.06f, 0.0f));
+
+		ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
+		ImGui::PopStyleVar(4);
+		ImGui::PopStyleColor(1);
+
+		// app logo
+		ImGui::PaddedImage((void*)(intptr_t)_logo_id, ImVec2( 19,19 ), ImVec2( 3,3 ));
+
+		// app title
+		ImGui::SameLine();
+		ImGui::PaddedText(_window->getTitle().c_str(), ImVec2(0.0f, 5.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
+
+		// close, minimize & maximize buttons
+		float buttons_w = 75.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 5 });
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{ 0.5f, 1.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+
+
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
+		if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, ImVec2{ 25, 25 }))
+			switchMinimized();
+		ImGui::SameLine();
+		if (ImGui::Button(is_maximized ? ICON_MDI_WINDOW_RESTORE : ICON_MDI_WINDOW_MAXIMIZE, ImVec2{ 25, 25 }))
+			switchMaximize();
+		ImGui::SameLine();
+		if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, ImVec2{ 25, 25 }))
+			_window->_onClose();
+
+		ImGui::PopStyleVar(5);
+		ImGui::PopStyleColor(1);
+
 		ImGui::End();
 	}
 
@@ -238,22 +495,130 @@ namespace nhahn
 		DBG("UI", DebugLevel::DEBUG, "UI context destroyed\n");
 	}
 
-	void UIContext::setStyleDarkOrange()
+	bool UIContext::disableTitlebar() const {
+#	ifdef _WIN32
+		auto win = (GLFWwindow*)_window->getNativeWindow();
+		if (win)
+		{
+			disableTitlebarWin32(win);
+			DBG("UI", DebugLevel::DEBUG, "removed windows titlebar\n");
+		}
+		return true;
+#	else
+		DBG("UI", DebugLevel::WARNING ,"NOT IMPLEMENTED: Disable Titlebar not implemented for this platform!\n");
+		return false;
+#	endif
+	}
+
+	void UIContext::switchMaximize() const
+	{
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		int maximized = glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
+
+		if (maximized)
+			glfwRestoreWindow(window);
+		else
+			glfwMaximizeWindow(window);
+	}
+
+	void UIContext::switchMinimized() const
+	{
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
+
+		if (minimized)
+			glfwRestoreWindow(window);
+		else
+			glfwIconifyWindow(window);
+	}
+
+	void UIContext::attemptDragWindow() {
+		auto window = (GLFWwindow*)_window->getNativeWindow();
+		bool is_maximized = false;
+
+	#ifdef _WIN32
+		HWND native_win = glfwGetWin32Window(window);
+		is_maximized = IsMaximized(native_win);
+	#endif
+
+		if (!is_maximized)
+		{
+			if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 0) {
+				glfwGetCursorPos(window, &_cursor_start_xpos, &_cursor_start_ypos);
+				glfwGetWindowSize(window, &_window_xsiz, &_window_ysiz);
+				_window_dragState = 1;
+			}
+			if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 1) {
+				double c_xpos, c_ypos;
+				int w_xpos, w_ypos;
+				glfwGetCursorPos(window, &c_xpos, &c_ypos);
+				glfwGetWindowPos(window, &w_xpos, &w_ypos);
+				if (_cursor_start_xpos >= 0 && _cursor_start_xpos <= ((double)_window_xsiz - 70) &&
+					_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25) {
+
+					if (is_maximized)
+						glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos), w_ypos + (c_ypos - _cursor_start_ypos));
+					else
+						glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos - 1), w_ypos + (c_ypos - _cursor_start_ypos - 1));
+				}
+				if (_cursor_start_xpos >= ((double)_window_xsiz - 15) && _cursor_start_xpos <= ((double)_window_xsiz) &&
+					_cursor_start_ypos >= ((double)_window_ysiz - 15) && _cursor_start_ypos <= ((double)_window_ysiz)) {
+					glfwSetWindowSize(window, _window_xsiz + (c_xpos - _cursor_start_xpos), _window_ysiz + (c_ypos - _cursor_start_ypos));
+				}
+			}
+			if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && _window_dragState == 1) {
+				_window_dragState = 0;
+			}
+		}
+	}
+
+	bool UIContext::createLogoTexture(const char* logo_path, unsigned int* out_texture, int* out_width, int* out_height)
+	{
+		int image_width = 0;
+		int image_height = 0;
+		void* image_data = FileSystem::loadImageFile(logo_path, &image_width, &image_height, NULL, 4);
+		if (image_data == NULL)
+			return false;
+
+		// Create a OpenGL texture identifier
+		GLuint image_texture;
+		glGenTextures(1, &image_texture);
+		glBindTexture(GL_TEXTURE_2D, image_texture);
+
+		// Setup filtering parameters for display
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+		// Upload pixels into texture
+	#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	#endif
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+		free(image_data);
+
+		*out_texture = (unsigned int)image_texture;
+		*out_width = image_width;
+		*out_height = image_height;
+	}
+
+	void UIContext::setStyleDarkOrange() const
 	{
 		ImVec4* colors = ImGui::GetStyle().Colors;
 		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-		colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_ChildBg] = ImVec4(0.80f, 0.41f, 0.24f, 0.0f);
 		colors[ImGuiCol_PopupBg] = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
-		colors[ImGuiCol_Border] = ImVec4(0.19f, 0.19f, 0.19f, 0.29f);
-		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
+		colors[ImGuiCol_Border] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
+		colors[ImGuiCol_BorderShadow] = ImVec4(0.202f, 0.202f, 0.202f, 0.240f);
 		colors[ImGuiCol_FrameBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
 		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
 		colors[ImGuiCol_FrameBgActive] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-		colors[ImGuiCol_TitleBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
-		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 		colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
 		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
@@ -265,10 +630,10 @@ namespace nhahn
 		colors[ImGuiCol_Button] = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
 		colors[ImGuiCol_ButtonHovered] = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
 		colors[ImGuiCol_ButtonActive] = ImVec4(0.68f, 0.35f, 0.20f, 1.00f);
-		colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-		colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
+		colors[ImGuiCol_Header] = ImVec4(0.06f, 0.06f, 0.06f, 0.52f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.06f, 0.06f, 0.06f, 0.36f);
 		colors[ImGuiCol_HeaderActive] = ImVec4(0.80f, 0.41f, 0.24f, 0.33f);
-		colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+		colors[ImGuiCol_Separator] = ImVec4(0.296f, 0.404f, 0.497f, 0.290f);
 		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
 		colors[ImGuiCol_SeparatorActive] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
 		colors[ImGuiCol_ResizeGrip] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
@@ -320,5 +685,7 @@ namespace nhahn
 		style.GrabRounding = 3;
 		style.LogSliderDeadzone = 4;
 		style.TabRounding = 4;
+		style.DockingSeparatorSize = 4;
+		style.WindowMenuButtonPosition = ImGuiDir_Right;
 	}
 }

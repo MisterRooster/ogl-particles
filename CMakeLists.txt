@@ -48,7 +48,9 @@ if (WIN32)
 		# Prevents Windows.h from defining min/max as macros 
 		NOMINMAX
 		_CRT_SECURE_NO_WARNINGS
-		GLEW_STATIC)   
+		GLEW_STATIC
+		# customize ImGui implementation
+		IMGUI_USER_CONFIG="thirdparty/oglp_imgui_config.h")   
 endif()
 
 # Compiler flags
@@ -118,6 +120,10 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 ## Put all libraries into a variable
 set(APP_LIBS glfw ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
+if(WIN32)
+	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib")
+endif()
+
 # Define the include DIRs
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "${CMAKE_SOURCE_DIR}/src"
@@ -127,7 +133,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 # Define the link libraries
-target_link_libraries(${PROJECT_NAME} ${APP_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${APP_LIBS})
 
 # Create virtual folders to make it look nicer in VS
 if(MSVC_IDE)

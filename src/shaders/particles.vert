@@ -12,8 +12,8 @@ void main()
     gl_Position = projectionMat * eyePos;
 
 	outColor = vColor;
-	
+
 	float dist = length(eyePos.xyz);
-	float att = inversesqrt(0.1f*dist);
-	gl_PointSize = 0.2f * att;
+	float att = inversesqrt(0.5f*dist);
+	gl_PointSize = 2.0f * att;
 }

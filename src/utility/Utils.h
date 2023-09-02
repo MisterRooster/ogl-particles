@@ -48,7 +48,5 @@ namespace nhahn
 
 		/** Split string at the delimiter positions. */
 		static std::vector<std::string> split(std::string str, std::string delimiter);
-
-		static void UIHelpMarker(const char* desc);
 	};
 }

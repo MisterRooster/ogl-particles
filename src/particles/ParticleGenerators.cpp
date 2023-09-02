@@ -7,8 +7,8 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "ParticleGenerators.h"
 
-#include <glm/gtc/random.hpp>
 #include "utility/Utils.h"
+#include <glm/gtc/random.hpp>
 
 #ifndef M_PI
 	#define M_PI 		3.1415926535897932384626433832795f
@@ -56,7 +56,7 @@ namespace nhahn
 
 	void BoxPosGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4 * RESTRICT pos = p->m_pos.get();
+		glm::vec4 * RESTRICT pos = p->m_pos;
 
 		const glm::vec4 posMin{ m_pos.x - m_maxStartPosOffset.x, m_pos.y - m_maxStartPosOffset.y, m_pos.z - m_maxStartPosOffset.z, 1.0 };
 		const glm::vec4 posMax{ m_pos.x + m_maxStartPosOffset.x, m_pos.y + m_maxStartPosOffset.y, m_pos.z + m_maxStartPosOffset.z, 1.0 };
@@ -74,7 +74,7 @@ namespace nhahn
 
 	void RoundPosGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4* RESTRICT pos = p->m_pos.get();
+		glm::vec4* RESTRICT pos = p->m_pos;
 
 		float ang;
 		for (size_t i = startId; i < endId; i += 2)
@@ -94,7 +94,7 @@ namespace nhahn
 
 	void SpherePosGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4* RESTRICT pos = p->m_pos.get();
+		glm::vec4* RESTRICT pos = p->m_pos;
 
 		float rad;
 		float phi;
@@ -122,8 +122,8 @@ namespace nhahn
 
 	void BasicColorGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4* RESTRICT startCol = p->m_startCol.get();
-		glm::vec4* RESTRICT endCol = p->m_endCol.get();
+		glm::vec4* RESTRICT startCol = p->m_startCol;
+		glm::vec4* RESTRICT endCol = p->m_endCol;
 
 		for (size_t i = startId; i < endId; i += 2)
 		{
@@ -142,7 +142,7 @@ namespace nhahn
 
 	void BasicVelGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4* RESTRICT vel = p->m_vel.get();
+		glm::vec4* RESTRICT vel = p->m_vel;
 
 		for (size_t i = startId; i < endId; i += 2)
 		{
@@ -157,7 +157,7 @@ namespace nhahn
 
 	void SphereVelGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4* RESTRICT vel = p->m_vel.get();
+		glm::vec4* RESTRICT vel = p->m_vel;
 
 		float phi, theta, v, r;
 		for (size_t i = startId; i < endId; ++i)
@@ -173,8 +173,8 @@ namespace nhahn
 
 	void VelFromPosGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4* RESTRICT veloc = p->m_vel.get();
-		glm::vec4* RESTRICT pos = p->m_pos.get();
+		glm::vec4* RESTRICT veloc = p->m_vel;
+		glm::vec4* RESTRICT pos = p->m_pos;
 
 		glm::vec4 scalev;
 		for (size_t i = startId; i < endId; ++i)
@@ -188,7 +188,7 @@ namespace nhahn
 
 	void BasicTimeGen::generate(double dt, ParticleData* p, size_t startId, size_t endId)
 	{
-		glm::vec4 * RESTRICT time = p->m_time.get();
+		glm::vec4 * RESTRICT time = p->m_time;
 
 		for (size_t i = startId; i < endId; i += 2)
 		{

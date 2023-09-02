@@ -10,7 +10,7 @@
 #include <string>
 #include "imgui.h"
 #include "utility/Debug.h"
-#include "utility/Utils.h"
+#include "ui/CustomWidgets.h"
 
 
 namespace nhahn
@@ -167,12 +167,12 @@ namespace nhahn
 		ImGui::SeparatorText("Settings:");
 
 		ImGui::SliderFloat("z scale", &m_zScale, 0.0f, 1.0f);
-		ImGui::SameLine(); Utils::UIHelpMarker("CTRL+click to input value.");
+		ImGui::SameLine(); ImGui::HelpMarker("CTRL+click to input value.");
 
 		ImGui::SeparatorText("Colors:");
 
 		ImGui::ColorEdit4("start color min", &m_colGenerator->m_minStartCol.x);
-		ImGui::SameLine(); Utils::UIHelpMarker(
+		ImGui::SameLine(); ImGui::HelpMarker(
 			"Click on the color square to open a color picker.\n"
 			"Click and hold to use drag and drop.\n"
 			"Right-click on the color square to show options.\n"

@@ -11,6 +11,7 @@
 #include "Application.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
+#include "ui/IconFontDefines.h"
 #include "utility/Debug.h"
 #include "utility/FileSystem.h"
 #include "utility/Utils.h"
@@ -45,9 +46,9 @@ namespace nhahn
 			ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
 			ImGui::DockBuilderSetNodeSize(dockSpaceId, ImGui::GetMainViewport()->Size);
 
-			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.35f, nullptr, &dockSpaceId);
-			ImGui::DockBuilderDockWindow("Properties", dock_id_left);
-			ImGui::DockBuilderDockWindow("Scene View", dockSpaceId);
+			auto dock_id_left = ImGui::DockBuilderSplitNode(dockSpaceId, ImGuiDir_Left, 0.25f, nullptr, &dockSpaceId);
+			ImGui::DockBuilderDockWindow(ICON_MDI_COGS " Properties", dock_id_left);
+			ImGui::DockBuilderDockWindow(ICON_MDI_EYE " Scene View", dockSpaceId);
 			ImGui::DockBuilderFinish(dockSpaceId);
 			DBG("UI", DebugLevel::DEBUG, "docked child windows to main dockspace\n");
 
@@ -69,6 +70,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
+		ImGui::ShowDemoWindow();
 	}
 }
 
@@ -79,7 +81,7 @@ int main()
 	using namespace nhahn;
 
 	{
-		Application app("Particle System");
+		Application app("Roosters OpenGL Particle System", true);
 		app.setRenderCallback(render, renderTickrate);
 
 		displayTex = std::make_shared<Texture>(TextureType::TEXTURE_2D, 640, 320);
@@ -100,7 +102,7 @@ int main()
 		_fountainEffect->initializeRenderer("gl");
 
 		_burningEffect = EffectFactory::create("burning");
-		_burningEffect->initialize(100000);
+		_burningEffect->initialize(200000);
 		_burningEffect->initializeRenderer("gl");
 
 		sceneView->setEffect(_fountainEffect.get());

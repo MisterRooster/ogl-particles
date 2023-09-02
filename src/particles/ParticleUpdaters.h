@@ -7,8 +7,12 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
-#include <glm/vec4.hpp>
 #include "ParticleSystem.h"
+
+#ifndef GLM_FORCE_INTRINSICS
+#define GLM_FORCE_INTRINSICS
+#endif // !GLM_FORCE_INTRINSICS
+#include <glm/vec4.hpp>
 
 
 namespace nhahn

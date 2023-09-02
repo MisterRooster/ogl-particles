@@ -20,7 +20,7 @@ namespace nhahn
 	class Window
 	{
 	public:
-		Window(const char* title, unsigned width, unsigned height);
+		Window(const char* title, unsigned width, unsigned height, bool customTitlebar = false);
 		~Window();
 
 		void setNativeWindow(void* window) { _nativeWindow = window; }
@@ -33,13 +33,17 @@ namespace nhahn
 		void preRender(double dt) const;
 		void postRender(double dt) const;
 
-		bool isRunning() { return _isRunning; }
+		bool isRunning() const { return _isRunning; }
+		bool hasCustomTitlebar() const { return _hasCustomTitlebar; }
+
+		void switchMaximize() const;
+		void switchMinimized() const;
 
 		void _onResize(int width, int height);
 		void _onClose();
 
 	private:
-		bool init();
+		bool init(bool customTitlebar);
 
 	private:
 		int _width = 0;
@@ -48,6 +52,8 @@ namespace nhahn
 
 		void* _nativeWindow = nullptr;
 		bool _isRunning = false;
+
+		bool _hasCustomTitlebar = false;
 
 		// Render contexts
 		std::unique_ptr<UIContext> _uiContext;
