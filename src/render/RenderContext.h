@@ -64,14 +64,18 @@ namespace nhahn
     private:
         void attemptDragWindow();
 
+        bool createLogoTexture(const char* logo_path, unsigned int* out_texture, int* out_width, int* out_height);
         void renderCustomTitlebar() const;
 
         void setStyleDarkOrange() const;
 
     private:
-        // for custom titlebar
-        double s_xpos = 0, s_ypos = 0;
-        int w_xsiz = 0, w_ysiz = 0;
-        int dragState = 0;
+        int _logo_width = 0, _logo_height = 0;
+        unsigned int _logo_id = 0;
+
+        // for custom titlebar dragging
+        double _cursor_start_xpos = 0, _cursor_start_ypos = 0;
+        int _window_xsiz = 0, _window_ysiz = 0;
+        int _window_dragState = 0;
     };
 }

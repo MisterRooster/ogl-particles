@@ -338,6 +338,11 @@ namespace nhahn
 		icons_config.GlyphMinAdvanceX = icon_font_size;
 		io.Fonts->AddFontFromFileTTF(if_path.c_str(), icon_font_size, &icons_config, icons_ranges);
 
+		// load logo image
+		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
+		ASSERT(_logo_id);
+
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return true;
 	}
@@ -410,74 +415,14 @@ namespace nhahn
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{ 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f, 0.0f });
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 0.06f, 0.06f, 0.0f));
 
 		ImGui::Begin("window-frame-titlebar", nullptr, titlebar_flags);
 		ImGui::PopStyleVar(4);
 		ImGui::PopStyleColor(1);
 
 		// app logo
-		auto loadFromFile = [](const char* filename, GLuint* out_texture, int* out_width, int* out_height) -> bool
-			{
-				// Load from file
-				int image_width = 0;
-				int image_height = 0;
-				unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
-				if (image_data == NULL)
-					return false;
-
-				// Create a OpenGL texture identifier
-				GLuint image_texture;
-				glGenTextures(1, &image_texture);
-				glBindTexture(GL_TEXTURE_2D, image_texture);
-
-				// Setup filtering parameters for display
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-
-				// Upload pixels into texture
-		#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		#endif
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-				stbi_image_free(image_data);
-
-				*out_texture = image_texture;
-				*out_width = image_width;
-				*out_height = image_height;
-
-				return true;
-			};
-
-		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
-		int logo_w = 0;
-		int logo_h = 0;
-		GLuint logo_text = 0;
-		bool ret = loadFromFile(logo_path.c_str(), &logo_text, &logo_w, &logo_h);
-		IM_ASSERT(ret);
-
-		ImGui::Begin("OpenGL Texture Text");
-		ImGui::Text("pointer = %p", logo_text);
-		ImGui::Text("size = %d x %d", logo_w, logo_h);
-		ImGui::Image((void*)(intptr_t)logo_text, ImVec2(logo_w, logo_h));
-		ImGui::End();
-
-		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
-		int logo_w = 0;
-		int logo_h = 0;
-		void* logo_data = FileSystem::loadImageFile(logo_path.c_str(), &logo_w, &logo_h, NULL, 4);
-
-		// logo to gpu & render
-		Texture logo_tex = Texture(TEXTURE_2D, logo_w, logo_h);
-		logo_tex.setFormat(TEXEL_FLOAT, 4, 4);
-		logo_tex.setFilter(true, true);
-		logo_tex.init();
-		logo_tex.copy(logo_data);
-		ImGui::Image((void*)(intptr_t)logo_tex.glName(), ImVec2{ 32,32 }, ImVec2{ 0,0 }, ImVec2{ 1,1 });
-		delete[] logo_data;
-		//ImGui::PaddedText(ICON_CI_FLAME ICON_CI_SPARKLE, ImVec2(4.0f, 8.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
+		ImGui::PaddedImage((void*)(intptr_t)_logo_id, ImVec2( 19,19 ), ImVec2( 3,3 ));
 
 		// app title
 		ImGui::SameLine();
@@ -576,30 +521,61 @@ namespace nhahn
 	void UIContext::attemptDragWindow() {
 		auto window = (GLFWwindow*)_window->getNativeWindow();
 
-		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && dragState == 0) {
-			glfwGetCursorPos(window, &s_xpos, &s_ypos);
-			glfwGetWindowSize(window, &w_xsiz, &w_ysiz);
-			dragState = 1;
+		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 0) {
+			glfwGetCursorPos(window, &_cursor_start_xpos, &_cursor_start_ypos);
+			glfwGetWindowSize(window, &_window_xsiz, &_window_ysiz);
+			_window_dragState = 1;
 		}
-		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && dragState == 1) {
+		if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 1) {
 			double c_xpos, c_ypos;
 			int w_xpos, w_ypos;
 			glfwGetCursorPos(window, &c_xpos, &c_ypos);
 			glfwGetWindowPos(window, &w_xpos, &w_ypos);
 			if (
-				s_xpos >= 0 && s_xpos <= ((double)w_xsiz - 70) &&
-				s_ypos >= 0 && s_ypos <= 25) {
-				glfwSetWindowPos(window, w_xpos + (c_xpos - s_xpos - 1), w_ypos + (c_ypos - s_ypos - 1));
+				_cursor_start_xpos >= 0 && _cursor_start_xpos <= ((double)_window_xsiz - 70) &&
+				_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25) {
+				glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos - 1), w_ypos + (c_ypos - _cursor_start_ypos - 1));
 			}
 			if (
-				s_xpos >= ((double)w_xsiz - 15) && s_xpos <= ((double)w_xsiz) &&
-				s_ypos >= ((double)w_ysiz - 15) && s_ypos <= ((double)w_ysiz)) {
-				glfwSetWindowSize(window, w_xsiz + (c_xpos - s_xpos), w_ysiz + (c_ypos - s_ypos));
+				_cursor_start_xpos >= ((double)_window_xsiz - 15) && _cursor_start_xpos <= ((double)_window_xsiz) &&
+				_cursor_start_ypos >= ((double)_window_ysiz - 15) && _cursor_start_ypos <= ((double)_window_ysiz)) {
+				glfwSetWindowSize(window, _window_xsiz + (c_xpos - _cursor_start_xpos), _window_ysiz + (c_ypos - _cursor_start_ypos));
 			}
 		}
-		if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && dragState == 1) {
-			dragState = 0;
+		if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && _window_dragState == 1) {
+			_window_dragState = 0;
 		}
+	}
+
+	bool UIContext::createLogoTexture(const char* logo_path, unsigned int* out_texture, int* out_width, int* out_height)
+	{
+		int image_width = 0;
+		int image_height = 0;
+		void* image_data = FileSystem::loadImageFile(logo_path, &image_width, &image_height, NULL, 4);
+		if (image_data == NULL)
+			return false;
+
+		// Create a OpenGL texture identifier
+		GLuint image_texture;
+		glGenTextures(1, &image_texture);
+		glBindTexture(GL_TEXTURE_2D, image_texture);
+
+		// Setup filtering parameters for display
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+		// Upload pixels into texture
+	#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	#endif
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+		free(image_data);
+
+		*out_texture = (unsigned int)image_texture;
+		*out_width = image_width;
+		*out_height = image_height;
 	}
 
 	void UIContext::setStyleDarkOrange() const

@@ -32,4 +32,16 @@ namespace ImGui
 		SetCursorScreenPos(last_crs);
 		InvisibleButton("##padded-text", elem_sz);
 	}
+
+	void PaddedImage(ImTextureID tex, ImVec2 size, ImVec2 padding, ImVec2 uv0, ImVec2 uv1,
+		ImVec4 tint_col, ImVec4 border_col)
+	{
+		ImVec2 last_crs = ImGui::GetCursorScreenPos();
+		ImVec2 elem_sz = ImVec2(padding.x * 2 + size.x, padding.y * 2 + size.y);
+
+		SetCursorScreenPos(ImVec2(last_crs.x + padding.x, last_crs.y + padding.y));
+		ImGui::Image(tex, size, uv0, uv1, tint_col, border_col);
+		SetCursorScreenPos(last_crs);
+		InvisibleButton("##padded-text", elem_sz);
+	}
 }
