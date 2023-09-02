@@ -14,9 +14,12 @@
 #include "ui/Window.h"
 #include "ui/IconFontDefines.h"
 #include "ui/CustomWidgets.h"
+#include "render/Texture.h"
 #include "input/Input.h"
 #include "utility/Debug.h"
 #include "utility/FileSystem.h"
+
+#include "thirdparty/stb_image.h"
 
 #include "GL/glew.h"
 #define GLFW_INCLUDE_GLEXT
@@ -414,8 +417,68 @@ namespace nhahn
 		ImGui::PopStyleColor(1);
 
 		// app logo
-		ImGui::PaddedText(ICON_CI_FLAME ICON_CI_SPARKLE, ImVec2(4.0f, 8.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
-		
+		auto loadFromFile = [](const char* filename, GLuint* out_texture, int* out_width, int* out_height) -> bool
+			{
+				// Load from file
+				int image_width = 0;
+				int image_height = 0;
+				unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+				if (image_data == NULL)
+					return false;
+
+				// Create a OpenGL texture identifier
+				GLuint image_texture;
+				glGenTextures(1, &image_texture);
+				glBindTexture(GL_TEXTURE_2D, image_texture);
+
+				// Setup filtering parameters for display
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+				// Upload pixels into texture
+		#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		#endif
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+				stbi_image_free(image_data);
+
+				*out_texture = image_texture;
+				*out_width = image_width;
+				*out_height = image_height;
+
+				return true;
+			};
+
+		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		int logo_w = 0;
+		int logo_h = 0;
+		GLuint logo_text = 0;
+		bool ret = loadFromFile(logo_path.c_str(), &logo_text, &logo_w, &logo_h);
+		IM_ASSERT(ret);
+
+		ImGui::Begin("OpenGL Texture Text");
+		ImGui::Text("pointer = %p", logo_text);
+		ImGui::Text("size = %d x %d", logo_w, logo_h);
+		ImGui::Image((void*)(intptr_t)logo_text, ImVec2(logo_w, logo_h));
+		ImGui::End();
+
+		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		int logo_w = 0;
+		int logo_h = 0;
+		void* logo_data = FileSystem::loadImageFile(logo_path.c_str(), &logo_w, &logo_h, NULL, 4);
+
+		// logo to gpu & render
+		Texture logo_tex = Texture(TEXTURE_2D, logo_w, logo_h);
+		logo_tex.setFormat(TEXEL_FLOAT, 4, 4);
+		logo_tex.setFilter(true, true);
+		logo_tex.init();
+		logo_tex.copy(logo_data);
+		ImGui::Image((void*)(intptr_t)logo_tex.glName(), ImVec2{ 32,32 }, ImVec2{ 0,0 }, ImVec2{ 1,1 });
+		delete[] logo_data;
+		//ImGui::PaddedText(ICON_CI_FLAME ICON_CI_SPARKLE, ImVec2(4.0f, 8.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
+
 		// app title
 		ImGui::SameLine();
 		ImGui::PaddedText(_window->getTitle().c_str(), ImVec2(0.0f, 5.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
