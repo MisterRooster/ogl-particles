@@ -46,7 +46,7 @@ uses **docking** release of **imGui** - [*tag (v1.89.8-docking)*](https://github
 uses version 3.3.8 - [*tag (3.3.8)*](https://github.com/glfw/glfw/tree/3.3.8)
 
 - dependencies/**glew** → GL/GLES/EGL/GLX/WGL Loader
-[https://github.com/nigels-com/glew](https://github.com/nigels-com/glew) - [*License*](https://github.com/nigels-com/glew/tree/glew-2.2.0)<br>
+[https://github.com/nigels-com/glew](https://github.com/nigels-com/glew) - [*License*](https://github.com/nigels-com/glew/blob/glew-2.2.0/LICENSE.txt)<br>
 uses a slightly altered version compatible with *CMake* named [**glew-cmake**](https://github.com/Perlmint/glew-cmake) - [*tag (glew-cmake-2.2.0)*](https://github.com/Perlmint/glew-cmake/tree/glew-cmake-2.2.0)
 
 - dependencies/**glm** → OpenGL vector and matrix math with SIMD
