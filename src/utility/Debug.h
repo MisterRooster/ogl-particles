@@ -7,6 +7,8 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
+// disable: empty controlled statement found but are intended because of macro definition
+#pragma warning(disable: 4390)
 
 namespace nhahn
 {
