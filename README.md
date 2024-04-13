@@ -8,7 +8,7 @@ SSE & AVX intrinsics are used to speed up vector calculations.
 Handles half a million particles on an AMD R9 290X GPU.
 
 > **Note**:
-A relatively recent GPU with fresh drivers is necessary to run this application. Support for OpenGL 4.4 core profile is required. 
+Support for OpenGL 4.4 core profile is required. 
 
 ## Controls
 
@@ -17,7 +17,9 @@ A relatively recent GPU with fresh drivers is necessary to run this application.
  + **[ ESCAPE ]** &emsp;&emsp;&emsp;&emsp;&nbsp;Quit
 
 ## How to Compile
+
 Clone the repo:
+
 ```bash
 git clone git://github.com/MisterRooster/ogl-particles.git
 cd ogl-particles 
@@ -26,11 +28,14 @@ cd ogl-particles
 Then simply run CMake with your favourite IDE. Tested with Visual Studio 2022,
 no working guarantee for other environments.
 Example commands for VS 2022:
+
 ```bash
 mkdir build
 cd build
 cmake -G "Visual Studio 17"..
 ```
+
+If you are using **Visual Studio Code**, checkout [How to compile with VS Code](docs/compile-instructions-vscode.md).
 
 ## 3rd Party
 
