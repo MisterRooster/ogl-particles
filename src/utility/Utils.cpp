@@ -120,7 +120,7 @@ namespace nhahn
 
 		for (size_t i = 0; i < 3; i += 2) {
 			const std::string hex = inputStr.substr(i, 2);
-			const byte decimal = std::strtol(hex.c_str(), 0, 16);
+			const byte decimal = (std::strtol(hex.c_str(), 0, 16) & 0xFF);
 			bytes.push_back(decimal);
 		}
 		return -((bytes[2]) << 16 | (bytes[1] & 0xFF) << 8 | (bytes[0] & 0xFF));

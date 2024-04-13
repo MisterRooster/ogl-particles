@@ -68,8 +68,8 @@ namespace nhahn
 
         std::shared_ptr<Texture> _srcD;
         std::unique_ptr<Texture> _screen;
-        glm::vec2 _srcSize;
-        glm::vec2 _screenSize;
+        glm::uvec2 _srcSize;
+        glm::uvec2 _screenSize;
 
         std::unique_ptr<Shader> _particleProg;
         std::unique_ptr<Texture> _particleTex;

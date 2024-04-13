@@ -65,7 +65,7 @@ namespace nhahn
         _particleProg = std::make_unique<Shader>(path.c_str(), "common.inc", "particles.vert", nullptr, "particles.frag", 1);
 
         // create blank buffer object
-        BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, _srcSize.x * _srcSize.y * sizeof(float)*4);
+        BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)(_srcSize.x * _srcSize.y * sizeof(float)*4));
         blackPbo->bind();
         blackPbo->map();
         memset(blackPbo->data(), 0, _srcSize.x * _srcSize.y * sizeof(float) * 4);
@@ -78,8 +78,8 @@ namespace nhahn
         _screen->copyPbo(*blackPbo);
 
         float* data = new float[_srcSize.x * _srcSize.y * 4];
-        for (int y = 0, idx = 0; y < _srcSize.y; y++) {
-            for (int x = 0; x < _srcSize.x; x++, idx++) {
+        for (unsigned int y = 0, idx = 0; y < _srcSize.y; y++) {
+            for (unsigned int x = 0; x < _srcSize.x; x++, idx++) {
                 data[idx] = 0.5f;
                 if (x == _srcSize.x - 1 || y == _srcSize.y - 1)
                     data[idx] = 0.0f;
@@ -126,7 +126,7 @@ namespace nhahn
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
 
-        ImGui::SetNextWindowSize(ImVec2(_screenSize.x, _screenSize.y), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2((float)_screenSize.x, (float)_screenSize.y), ImGuiCond_FirstUseEver);
         ImGui::Begin(ICON_MDI_EYE " Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
@@ -183,7 +183,7 @@ namespace nhahn
 
         // add rendered texture to ImGUI scene window
         uint64_t textureID = _screen->glName();
-        ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ _screenSize.x, _screenSize.y }, ImVec2{0,1}, ImVec2{1,0});
+        ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ (float)_screenSize.x, (float)_screenSize.y }, ImVec2{0,1}, ImVec2{1,0});
         if (ImGui::IsItemHovered())
             ImGui::SetMouseCursor(7);
 

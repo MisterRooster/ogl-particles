@@ -292,7 +292,7 @@ namespace nhahn
 	{
 		__super::init(window);
 
-		// GL 3.0 + GLSL 410
+		// GL 3.0 + GLSL 440
 		const char* glsl_version = "#version 440";
 
 		// setup dear imgui context

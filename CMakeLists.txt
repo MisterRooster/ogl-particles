@@ -39,7 +39,7 @@ add_link_options(
 	$<$<NOT:$<CONFIG:DEBUG>>:/ENTRY:mainCRTStartup>)
 add_executable(${PROJECT_NAME} ${APP_HEADER_FILES} ${APP_SOURCE_FILES})
 
-# Preprocessor definesS
+# Preprocessor defines
 if (WIN32)
 	target_compile_definitions(
 		${PROJECT_NAME} PRIVATE   
@@ -66,7 +66,7 @@ endif()
 # External libraries
 #######################################
 
-## OpenGL
+# OpenGL
 find_package(OpenGL REQUIRED)
 
 # Download all submodules
@@ -117,7 +117,7 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glew-cmake )
 # GLM
 add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 
-## Put all libraries into a variable
+# Put all libraries into a variable
 set(APP_LIBS glfw ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
 if(WIN32)
