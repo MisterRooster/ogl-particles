@@ -5,23 +5,18 @@ project(ogl-particles)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-# Output
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(APP_BUILD_TYPE "Debug")
-else()
-	set(APP_BUILD_TYPE "Release")
-endif()
-
 # Find source files
-file(GLOB_RECURSE APP_SOURCE_FILES 
+# CONFIGURE_DEPENDS re-runs the glob on build, so adding or removing a file is picked up without
+# having to remember to re-configure by hand.
+file(GLOB_RECURSE APP_SOURCE_FILES CONFIGURE_DEPENDS
 	${CMAKE_SOURCE_DIR}/src/*.c
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/src/*.glsl
 	${CMAKE_SOURCE_DIR}/src/*.vert
 	${CMAKE_SOURCE_DIR}/src/*.frag)
-	
+
 # Find header files
-file(GLOB_RECURSE APP_HEADER_FILES 
+file(GLOB_RECURSE APP_HEADER_FILES CONFIGURE_DEPENDS
 	${CMAKE_SOURCE_DIR}/src/*.h
 	${CMAKE_SOURCE_DIR}/src/*.hpp
 	${CMAKE_SOURCE_DIR}/src/*.inc)
@@ -153,11 +148,12 @@ if(WIN32)
 endif()
 
 # Define the include DIRs
+# All PRIVATE: nothing links this target, so PUBLIC usage requirements have no consumer.
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "${CMAKE_SOURCE_DIR}/src"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glm"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/imgui"
+	PRIVATE "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
+	PRIVATE "${CMAKE_SOURCE_DIR}/dependencies/glm"
+	PRIVATE "${CMAKE_SOURCE_DIR}/dependencies/imgui"
 )
 
 # Define the link libraries
