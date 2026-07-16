@@ -66,13 +66,18 @@ if (MSVC)
 endif()
 
 # Compiler flags
-#if (MSVC)
-#    # warning level 4 and all warnings as errors
-#	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-#else()
-#    # lots of warnings and all warnings as errors
-#	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wformat -Wcast-align)
-#endif()
+if (MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wformat -Wcast-align)
+endif()
+
+# The vendored ImGui and stb_image are compiled as part of this target but are not ours to clean up,
+# so build them at default warning level instead of drowning the app's own diagnostics.
+set_source_files_properties(
+	${CMAKE_SOURCE_DIR}/src/thirdparty/ImGuiBuild.cpp
+	${CMAKE_SOURCE_DIR}/src/thirdparty/stb_image.cpp
+	PROPERTIES COMPILE_OPTIONS "$<IF:$<BOOL:${MSVC}>,/W0,-w>")
 
 # SIMD flags
 # ParticleUpdaters.cpp is the only translation unit using AVX/SSE4.1 intrinsics, so the arch flag is
