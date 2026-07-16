@@ -8,7 +8,7 @@ out vec4 outColor;
 
 void main() 
 {
-    vec4 eyePos = modelViewMat * gl_Vertex;
+    vec4 eyePos = modelViewMat * vVertex;
     gl_Position = projectionMat * eyePos;
 
 	outColor = vColor;
