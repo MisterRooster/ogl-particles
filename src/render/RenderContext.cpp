@@ -601,6 +601,8 @@ namespace nhahn
 		*out_texture = (unsigned int)image_texture;
 		*out_width = image_width;
 		*out_height = image_height;
+
+		return true;
 	}
 
 	void UIContext::setStyleDarkOrange() const
