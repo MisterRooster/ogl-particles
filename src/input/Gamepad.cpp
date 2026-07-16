@@ -5,8 +5,6 @@
 | Licensed under the MIT license. See LICENSE file for full terms.
 | This notice is not to be removed.
 \*------------------------------------------------------------------------------------------------*/
-#pragma comment(lib, "XInput.lib")
-
 #include "Gamepad.h"
 #include "utility/Debug.h"
 #include <Xinput.h>

@@ -7,6 +7,7 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "SceneView.h"
 
+#include <cstdlib>
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -49,7 +50,7 @@ namespace nhahn
         : _srcD(t), _screenSize(400, 225)
     {
         _srcSize = glm::vec2(t->width(), t->height());
-        std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
+        std::string path = nhahn::FileSystem::getModuleDirectory() + "data/shaders/";
 
         // global gl stats
         glEnable(GL_DEPTH_TEST);
@@ -89,7 +90,7 @@ namespace nhahn
         delete[] data;
 
         // particle texture
-        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data\\sprites\\scorch_02.png";
+        std::string texturePath = nhahn::FileSystem::getModuleDirectory() + "data/sprites/scorch_02.png";
         
         int textureW, textureH, textureChannels;
         void* textureData = FileSystem::loadImageFile(texturePath.c_str(), &textureW, &textureH, &textureChannels, 4);
@@ -99,7 +100,8 @@ namespace nhahn
         _particleTex->setFormat(TEXEL_FLOAT, 4, 1);
         _particleTex->init();
         _particleTex->copy(textureData);
-        delete[] textureData;
+        // loadImageFile() returns stb_image memory, which must be released with free()
+        free(textureData);
 
         _currentEffect = nullptr;
 

@@ -47,16 +47,6 @@ namespace nhahn
 			m_particles.m_acc[i] = glm::vec4(0.0f);
 		}
 
-		for (size_t i = 0; i < m_count; i += 2)
-		{
-			m_particles.m_acc[i] = glm::vec4(0.0f);
-			m_particles.m_acc[i + 1] = glm::vec4(0.0f);
-		}
-		if (m_count % 2 != 0)
-		{
-			m_particles.m_acc[m_count - 1] = glm::vec4(0.0f);
-		}
-
 		for (auto& up : m_updaters)
 		{
 			up->update(dt, &m_particles);

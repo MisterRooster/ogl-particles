@@ -12,13 +12,13 @@ namespace nhahn
 {
 	ParticleData::~ParticleData()
 	{
-		_aligned_free(m_pos);
-		_aligned_free(m_col);
-		_aligned_free(m_startCol);
-		_aligned_free(m_endCol);
-		_aligned_free(m_vel);
-		_aligned_free(m_acc);
-		_aligned_free(m_time);
+		::operator delete[](m_pos, ALIGNMENT);
+		::operator delete[](m_col, ALIGNMENT);
+		::operator delete[](m_startCol, ALIGNMENT);
+		::operator delete[](m_endCol, ALIGNMENT);
+		::operator delete[](m_vel, ALIGNMENT);
+		::operator delete[](m_acc, ALIGNMENT);
+		::operator delete[](m_time, ALIGNMENT);
 	}
 
 	void ParticleData::generate(size_t maxSize)
@@ -28,13 +28,15 @@ namespace nhahn
 
 		static_assert(sizeof(glm::vec4) == 4 * sizeof(float), "size is 16...");
 
-		m_pos = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
-		m_col = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
-		m_startCol = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
-		m_endCol = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
-		m_vel = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
-		m_acc = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
-		m_time = (glm::vec4*)_aligned_malloc(sizeof(glm::vec4) * maxSize, 16);
+		const size_t bytes = sizeof(glm::vec4) * maxSize;
+
+		m_pos = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
+		m_col = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
+		m_startCol = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
+		m_endCol = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
+		m_vel = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
+		m_acc = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
+		m_time = (glm::vec4*)::operator new[](bytes, ALIGNMENT);
 
 		m_alive.reset(new bool[maxSize]);
 	}

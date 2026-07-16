@@ -5,8 +5,6 @@
 | Licensed under the MIT license. See LICENSE file for full terms.
 | This notice is not to be removed.
 \*------------------------------------------------------------------------------------------------*/
-#pragma once
-
 #include "FileSystem.h"
 #include <sys/stat.h>
 #include "Debug.h"

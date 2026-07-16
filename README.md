@@ -8,7 +8,7 @@ SSE & AVX intrinsics are used to speed up vector calculations.
 Handles half a million particles on an AMD R9 290X GPU.
 
 > **Note**:
-Support for OpenGL 4.4 core profile is required. 
+Requires a GPU driver supporting GLSL 4.40 and a CPU supporting AVX.
 
 ## Controls
 
@@ -32,8 +32,11 @@ Example commands for VS 2022:
 ```bash
 mkdir build
 cd build
-cmake -G "Visual Studio 17"..
+cmake -G "Visual Studio 17 2022" -A x64 ..
+cmake --build . --config Release
 ```
+
+The executable and its assets are written to `bin/`.
 
 If you are using **Visual Studio Code**, checkout [How to compile with VS Code](docs/compile-instructions-vscode.md).
 
@@ -46,10 +49,10 @@ Structure and description of 3rd parts libraries and related copyrights & licens
 uses version 3.3.8 - [*tag (3.3.8)*](https://github.com/glfw/glfw/tree/3.3.8) - [*License*](https://github.com/glfw/glfw/blob/3.3.8/LICENSE.md)
 
 - dependencies/**glew** → GL/GLES/EGL/GLX/WGL Loader<br>
-uses a slightly altered version compatible with *CMake* named [**glew-cmake**](https://github.com/Perlmint/glew-cmake) - [*tag (glew-cmake-2.2.0)*](https://github.com/Perlmint/glew-cmake/tree/glew-cmake-2.2.0) - [*License*](https://github.com/nigels-com/glew/blob/glew-2.2.0/LICENSE.txt)
+uses a slightly altered version compatible with *CMake* named [**glew-cmake**](https://github.com/Perlmint/glew-cmake) - [*tag (glew-cmake-2.3.1)*](https://github.com/Perlmint/glew-cmake/tree/glew-cmake-2.3.1) - [*License*](https://github.com/nigels-com/glew/blob/glew-2.2.0/LICENSE.txt)
 
 - dependencies/**glm** → OpenGL vector and matrix math with SIMD<br>
-uses version 9.9.8 - [*commit (47585fd)*](https://github.com/g-truc/glm/tree/47585fde0c49fa77a2bf2fb1d2ead06999fd4b6e) - [*License*](https://github.com/g-truc/glm/blob/47585fde0c49fa77a2bf2fb1d2ead06999fd4b6e/copying.txt)
+uses version 1.0.3 - [*commit (8d1fd52)*](https://github.com/g-truc/glm/tree/8d1fd52e5ab5590e2c81768ace50c72bae28f2ed) - [*License*](https://github.com/g-truc/glm/blob/8d1fd52e5ab5590e2c81768ace50c72bae28f2ed/copying.txt)
 
 - src/thirdparty/**stb_image.h** → Single file image loader<br>
 uses version 2.28 - [*commit (5736b15)*](https://github.com/nothings/stb/tree/5736b15f7ea0ffb08dd38af21067c314d6a3aae9) - [*License*](https://github.com/nothings/stb/blob/5736b15f7ea0ffb08dd38af21067c314d6a3aae9/LICENSE)

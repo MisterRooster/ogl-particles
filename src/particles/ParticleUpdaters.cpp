@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <glm/common.hpp>
 #include <glm/gtc/random.hpp>
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #define SSE_MODE_NONE 0
 #define SSE_MODE_SSE2 1
@@ -74,7 +74,9 @@ namespace nhahn
 		__m256 ldt = _mm256_set1_ps(localDT);
 		size_t i;
 
-		for (i = 0; i < endId; i += 2)
+		// each __m256 step covers two vec4s, so stop at endId-1 and let the scalar tail below
+		// handle a trailing odd element instead of running one past the last particle
+		for (i = 0; i + 1 < endId; i += 2)
 		{
 			pa = (__m256*)(&acc[i].x);
 			*pa = _mm256_add_ps(*pa, ga);
@@ -84,7 +86,7 @@ namespace nhahn
 			acc[i] += globalA;
 		}
 
-		for (i = 0; i < endId; i += 2)
+		for (i = 0; i + 1 < endId; i += 2)
 		{
 			pa = (__m256*)(&vel[i].x);
 			pb = (__m256*)(&acc[i].x);
@@ -96,7 +98,7 @@ namespace nhahn
 			vel[i] += localDT * acc[i];
 		}
 
-		for (size_t i = 0; i < endId; i += 2)
+		for (i = 0; i + 1 < endId; i += 2)
 		{
 			pa = (__m256*)(&pos[i].x);
 			pb = (__m256*)(&vel[i].x);
@@ -112,8 +114,6 @@ namespace nhahn
 
 	void FloorUpdater::update(double dt, ParticleData* p)
 	{
-		const float localDT = (float)dt;
-
 		glm::vec4* RESTRICT acc = p->m_acc;
 		glm::vec4* RESTRICT vel = p->m_vel;
 		glm::vec4* RESTRICT pos = p->m_pos;
@@ -138,26 +138,6 @@ namespace nhahn
 
 	}
 
-	inline float inverse(float x)
-	{
-		// re-interpret as a 32 bit integer
-		unsigned int* i = (unsigned int*)&x;
-
-		// adjust exponent
-		//*i = 0x7F000000 - *i;
-		*i = 0x7EEEEEEE - *i;
-		return x;
-	}
-
-	inline float inverse2(float f)
-	{
-		int x = *reinterpret_cast<int*>(&f);
-		x = 0x7EF311C2 - x;
-		float inv = *reinterpret_cast<float*>(&x);
-		//inv = inv * (2 - inv * f);
-		return inv;
-	}
-
 	void AttractorUpdater::update(double dt, ParticleData* p)
 	{
 		const size_t countAttractors = m_attractors.size();
@@ -165,17 +145,10 @@ namespace nhahn
 		for (size_t i = 0; i < countAttractors; ++i)
 			attr[i] = glm::vec4(m_attractors[i]);
 
-		const float localDT = (float)dt;
-
-		glm::vec4* RESTRICT acc = p->m_acc;
-		glm::vec4* RESTRICT vel = p->m_vel;
-		glm::vec4* RESTRICT pos = p->m_pos;
-
 		const size_t endId = p->m_countAlive;
 		glm::vec4 off = glm::vec4(0.0f);
-	#if SSE_MODE == SSE_MODE_NONE
 		float dist;
-	#elif SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
+	#if SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
 		__m128 tempDist;
 	#endif
 
@@ -192,8 +165,8 @@ namespace nhahn
 		#elif SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
 				off = attr[a] - p->m_pos[i];
 				tempDist = _mm_dp_ps(*(__m128*)(&off.data), *(__m128*)(&off.data), 0x71);
-				tempDist.m128_f32[0] = attr[a].w / tempDist.m128_f32[0];// *inverse2(fabs(tempDist.m128_f32[0]);
-				p->m_acc[i] += off * tempDist.m128_f32[0];
+				dist = attr[a].w / _mm_cvtss_f32(tempDist);
+				p->m_acc[i] += off * dist;
 		#endif
 			}
 		}

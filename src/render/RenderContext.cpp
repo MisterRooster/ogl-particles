@@ -88,7 +88,7 @@ namespace nhahn
 	        case WM_NCCALCSIZE:
 	        {
 	            // Remove the window's standard sizing border
-	            if (wParam == TRUE && lParam != NULL)
+	            if (wParam == TRUE && lParam != 0)
 	            {
 					if (!IsMaximized(hWnd))
 					{
@@ -184,7 +184,7 @@ namespace nhahn
 		int height = windowRect.bottom - windowRect.top;
 
 		original_proc = (WNDPROC)GetWindowLongPtr(hWnd, GWLP_WNDPROC);
-		(WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc));
+		SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc));
 		SetWindowPos(hWnd, NULL, 0, 0, width, height, SWP_FRAMECHANGED | SWP_NOMOVE);
 	}
 #endif // _WIN32
@@ -193,7 +193,7 @@ namespace nhahn
 
 	bool GLContext::init(Window* window)
 	{
-		__super::init(window);
+		RenderContext::init(window);
 		glfwSetErrorCallback(error_callback);
 
 		// initialize glfw
@@ -228,9 +228,9 @@ namespace nhahn
 		glfwSetWindowCloseCallback(gl_Window, on_window_close_callback);
 
 		// application icons
-		std::string icon32_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
-		std::string icon64_path = FileSystem::getModuleDirectory() + "data\\icons\\logo64.png";
-		std::string icon96_path = FileSystem::getModuleDirectory() + "data\\icons\\logo96.png";
+		std::string icon32_path = FileSystem::getModuleDirectory() + "data/icons/logo32.png";
+		std::string icon64_path = FileSystem::getModuleDirectory() + "data/icons/logo64.png";
+		std::string icon96_path = FileSystem::getModuleDirectory() + "data/icons/logo96.png";
 
 		GLFWimage icons[3];
 		int i32_ch, i64_ch, i96_ch;
@@ -290,7 +290,7 @@ namespace nhahn
 
 	bool UIContext::init(Window* window)
 	{
-		__super::init(window);
+		RenderContext::init(window);
 
 		// GL 3.0 + GLSL 440
 		const char* glsl_version = "#version 440";
@@ -325,8 +325,8 @@ namespace nhahn
 		}
 
 		// load custom font
-		std::string df_path = FileSystem::getModuleDirectory() + "data\\fonts\\Ubuntu-Regular.ttf";
-		std::string if_path = FileSystem::getModuleDirectory() + "data\\fonts\\MaterialDesignIconsDesktop.ttf";
+		std::string df_path = FileSystem::getModuleDirectory() + "data/fonts/Ubuntu-Regular.ttf";
+		std::string if_path = FileSystem::getModuleDirectory() + "data/fonts/MaterialDesignIconsDesktop.ttf";
 
 		float base_font_size = 13.0f;
 		ImFontConfig df_config;
@@ -344,9 +344,9 @@ namespace nhahn
 		io.Fonts->AddFontFromFileTTF(if_path.c_str(), icon_font_size, &icons_config, icons_ranges);
 
 		// load logo image
-		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		std::string logo_path = FileSystem::getModuleDirectory() + "data/icons/logo32.png";
 		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
-		ASSERT(_logo_id, "Failed to create logo texture!");
+		ASSERT(ret && _logo_id, "Failed to create logo texture!");
 
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return true;
@@ -601,6 +601,8 @@ namespace nhahn
 		*out_texture = (unsigned int)image_texture;
 		*out_width = image_width;
 		*out_height = image_height;
+
+		return true;
 	}
 
 	void UIContext::setStyleDarkOrange() const

@@ -1,27 +1,22 @@
-cmake_minimum_required(VERSION 3.9.0)
+cmake_minimum_required(VERSION 3.15.0)
 project(ogl-particles)
 
 # Set CXX standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-# Output
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(APP_BUILD_TYPE "Debug")
-else()
-	set(APP_BUILD_TYPE "Release")
-endif()
-
 # Find source files
-file(GLOB_RECURSE APP_SOURCE_FILES 
+# CONFIGURE_DEPENDS re-runs the glob on build, so adding or removing a file is picked up without
+# having to remember to re-configure by hand.
+file(GLOB_RECURSE APP_SOURCE_FILES CONFIGURE_DEPENDS
 	${CMAKE_SOURCE_DIR}/src/*.c
 	${CMAKE_SOURCE_DIR}/src/*.cpp
 	${CMAKE_SOURCE_DIR}/src/*.glsl
 	${CMAKE_SOURCE_DIR}/src/*.vert
 	${CMAKE_SOURCE_DIR}/src/*.frag)
-	
+
 # Find header files
-file(GLOB_RECURSE APP_HEADER_FILES 
+file(GLOB_RECURSE APP_HEADER_FILES CONFIGURE_DEPENDS
 	${CMAKE_SOURCE_DIR}/src/*.h
 	${CMAKE_SOURCE_DIR}/src/*.hpp
 	${CMAKE_SOURCE_DIR}/src/*.inc)
@@ -32,35 +27,63 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 # Target
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_UNICODE /DUNICODE")
-add_link_options(
-	$<$<CONFIG:DEBUG>:/SUBSYSTEM:CONSOLE>
-	$<$<NOT:$<CONFIG:DEBUG>>:/SUBSYSTEM:WINDOWS>
-	$<$<NOT:$<CONFIG:DEBUG>>:/ENTRY:mainCRTStartup>)
+add_compile_definitions(_UNICODE UNICODE)
+if (MSVC)
+	add_link_options(
+		$<$<CONFIG:DEBUG>:/SUBSYSTEM:CONSOLE>
+		$<$<NOT:$<CONFIG:DEBUG>>:/SUBSYSTEM:WINDOWS>
+		$<$<NOT:$<CONFIG:DEBUG>>:/ENTRY:mainCRTStartup>)
+elseif (WIN32)
+	add_link_options($<$<NOT:$<CONFIG:DEBUG>>:-mwindows>)
+endif()
 add_executable(${PROJECT_NAME} ${APP_HEADER_FILES} ${APP_SOURCE_FILES})
 
 # Preprocessor defines
+# These are not platform specific and must apply everywhere: GLEW is linked static, and dropping
+# IMGUI_USER_CONFIG would silently build ImGui without this project's configuration.
+target_compile_definitions(
+	${PROJECT_NAME} PRIVATE
+	GLEW_STATIC
+	# customize ImGui implementation
+	IMGUI_USER_CONFIG="thirdparty/oglp_imgui_config.h")
+
 if (WIN32)
 	target_compile_definitions(
-		${PROJECT_NAME} PRIVATE   
-		# Prevents Windows.h from adding unnecessary includes    
-		WIN32_LEAN_AND_MEAN  
-		# Prevents Windows.h from defining min/max as macros 
-		NOMINMAX
-		_CRT_SECURE_NO_WARNINGS
-		GLEW_STATIC
-		# customize ImGui implementation
-		IMGUI_USER_CONFIG="thirdparty/oglp_imgui_config.h")   
+		${PROJECT_NAME} PRIVATE
+		# Prevents Windows.h from adding unnecessary includes
+		WIN32_LEAN_AND_MEAN
+		# Prevents Windows.h from defining min/max as macros
+		NOMINMAX)
+endif()
+
+if (MSVC)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Compiler flags
-#if (MSVC)
-#    # warning level 4 and all warnings as errors
-#	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-#else()
-#    # lots of warnings and all warnings as errors
-#	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wformat -Wcast-align)
-#endif()
+if (MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wformat -Wcast-align)
+endif()
+
+# The vendored ImGui and stb_image are compiled as part of this target but are not ours to clean up,
+# so build them at default warning level instead of drowning the app's own diagnostics.
+set_source_files_properties(
+	${CMAKE_SOURCE_DIR}/src/thirdparty/ImGuiBuild.cpp
+	${CMAKE_SOURCE_DIR}/src/thirdparty/stb_image.cpp
+	PROPERTIES COMPILE_OPTIONS "$<IF:$<BOOL:${MSVC}>,/W0,-w>")
+
+# SIMD flags
+# ParticleUpdaters.cpp is the only translation unit using AVX/SSE4.1 intrinsics, so the arch flag is
+# scoped to it. This keeps the rest of the app baseline x86-64.
+if (MSVC)
+	set(APP_SIMD_FLAGS /arch:AVX)
+else()
+	set(APP_SIMD_FLAGS -mavx)
+endif()
+set_source_files_properties(${CMAKE_SOURCE_DIR}/src/particles/ParticleUpdaters.cpp
+	PROPERTIES COMPILE_OPTIONS "${APP_SIMD_FLAGS}")
 
 #######################################
 # External libraries
@@ -121,15 +144,16 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 set(APP_LIBS glfw ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
 if(WIN32)
-	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib")
+	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib" "Xinput9_1_0.lib")
 endif()
 
 # Define the include DIRs
+# All PRIVATE: nothing links this target, so PUBLIC usage requirements have no consumer.
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "${CMAKE_SOURCE_DIR}/src"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/glm"
-	PUBLIC "${CMAKE_SOURCE_DIR}/dependencies/imgui"
+	PRIVATE "${CMAKE_SOURCE_DIR}/dependencies/glfw/include"
+	PRIVATE "${CMAKE_SOURCE_DIR}/dependencies/glm"
+	PRIVATE "${CMAKE_SOURCE_DIR}/dependencies/imgui"
 )
 
 # Define the link libraries
@@ -156,17 +180,19 @@ if(MSVC_IDE)
 	GroupSources(src)
 endif()
 
-# Copy dlls and shaders
-if(WIN32)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
+# Copy runtime assets next to the executable, which is where FileSystem::getModuleDirectory() looks
+# for them. Not Windows only: without these the app builds but has no shaders or sprites to load.
+# This is its own target rather than a POST_BUILD step on the executable, because POST_BUILD only
+# runs when the exe relinks: editing a shader on its own left a stale copy deployed.
+add_custom_target(copy_assets ALL
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		"${PROJECT_SOURCE_DIR}/data"
-		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data")
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		"${PROJECT_SOURCE_DIR}/src/shaders"
-		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data/shaders")
-endif()
+		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data/shaders"
+	COMMENT "Copying runtime assets")
+add_dependencies(copy_assets ${PROJECT_NAME})
 
 # Install executable to the bin directory
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

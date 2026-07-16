@@ -15,7 +15,7 @@
 namespace nhahn
 {
 	Window::Window(const char* title, unsigned width, unsigned height, bool customTitlebar)
-		: _title(title), _width(width), _height(height), _nativeWindow(nullptr),
+		: _width(width), _height(height), _title(title), _nativeWindow(nullptr),
 		_isRunning(true)
 	{		
 		_renderContext = std::make_unique<GLContext>();

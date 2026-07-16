@@ -7,9 +7,6 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
-// disable: empty controlled statement found but are intended because of macro definition
-#pragma warning(disable: 4390)
-
 namespace nhahn
 {
     #define DEBUG_LEVEL DebugLevel::DEBUG
@@ -21,14 +18,16 @@ namespace nhahn
         VERBOSE = 3
     };
 
+    // ASSERT and FAIL stay live in every configuration. They are the only error paths this code has,
+    // and compiling them out turns a clean exit into a crash: the caller's error branch falls through
+    // into code that assumes the failure never happened.
+    #define ASSERT(EXP, ...) debugAssert(__FILE__, __LINE__, (bool)(EXP), __VA_ARGS__)
+    #define FAIL(...) debugFail(__FILE__, __LINE__, __VA_ARGS__)
+
     #ifndef NDEBUG
     # define DBG(MODULE, LEVEL, ...) debugLog(MODULE, LEVEL, __VA_ARGS__)
-    # define ASSERT(EXP, ...) debugAssert(__FILE__, __LINE__, (bool)(EXP), __VA_ARGS__)
-    # define FAIL(...) debugFail(__FILE__, __LINE__, __VA_ARGS__)
     #else
-    # define DBG(MODULE, LEVEL, FMT, ...)
-    # define ASSERT(A, B, ...)
-    # define FAIL(A, ...)
+    # define DBG(MODULE, LEVEL, ...) ((void)0)
     #endif
 
     void debugLog(const char* module, DebugLevel level, const char* format, ...);

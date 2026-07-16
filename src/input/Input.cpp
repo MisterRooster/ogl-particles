@@ -12,7 +12,7 @@
 
 namespace nhahn
 {
-	Input::Input() : m_MouseWheelPos(0), mx(0), my(0), _pollRate(0.01)
+	Input::Input() : _pollRate(0.01), mx(0), my(0), m_MouseWheelPos(0)
 	{
 		DBG("Input", DebugLevel::INFO, "Start input manager\n");
 
@@ -106,7 +106,7 @@ namespace nhahn
 			return false;
 
 		if (action == IKA_REPEAT) action = IKA_PRESS;
-		return ((_gpadDevice->getState().gamepadState.wButtons & buttoncode) != action);
+		return ((_gpadDevice->getState().gamepadState.wButtons & buttoncode) != static_cast<unsigned int>(action));
 		return false;
 
 		return true;

@@ -40,7 +40,6 @@ namespace nhahn
 			ImGui::Begin("MainDockspaceWindow");
 
 			ImGuiID dockSpaceId = ImGui::GetID("MainDockspace");
-			ImGuiID dockspace_id_copy = dockSpaceId;
 
 			ImGui::DockBuilderRemoveNode(dockSpaceId); // clear any previous layout
 			ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
@@ -70,7 +69,6 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
-		ImGui::ShowDemoWindow();
 	}
 }
 
@@ -79,6 +77,14 @@ namespace nhahn
 int main()
 {
 	using namespace nhahn;
+
+	// The particle updaters are compiled with AVX unconditionally. Report that up front rather than
+	// letting the first update crash with an illegal instruction.
+	if (!Utils::cpuSupportsAVX())
+	{
+		printf("This CPU does not support AVX, which is required to run the particle updaters.\n");
+		return EXIT_FAILURE;
+	}
 
 	{
 		Application app("Roosters OpenGL Particle System", true);
