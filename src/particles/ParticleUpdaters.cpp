@@ -114,8 +114,6 @@ namespace nhahn
 
 	void FloorUpdater::update(double dt, ParticleData* p)
 	{
-		const float localDT = (float)dt;
-
 		glm::vec4* RESTRICT acc = p->m_acc;
 		glm::vec4* RESTRICT vel = p->m_vel;
 		glm::vec4* RESTRICT pos = p->m_pos;
@@ -140,38 +138,12 @@ namespace nhahn
 
 	}
 
-	inline float inverse(float x)
-	{
-		// re-interpret as a 32 bit integer
-		unsigned int* i = (unsigned int*)&x;
-
-		// adjust exponent
-		//*i = 0x7F000000 - *i;
-		*i = 0x7EEEEEEE - *i;
-		return x;
-	}
-
-	inline float inverse2(float f)
-	{
-		int x = *reinterpret_cast<int*>(&f);
-		x = 0x7EF311C2 - x;
-		float inv = *reinterpret_cast<float*>(&x);
-		//inv = inv * (2 - inv * f);
-		return inv;
-	}
-
 	void AttractorUpdater::update(double dt, ParticleData* p)
 	{
 		const size_t countAttractors = m_attractors.size();
 		glm::vec4 attr[8];
 		for (size_t i = 0; i < countAttractors; ++i)
 			attr[i] = glm::vec4(m_attractors[i]);
-
-		const float localDT = (float)dt;
-
-		glm::vec4* RESTRICT acc = p->m_acc;
-		glm::vec4* RESTRICT vel = p->m_vel;
-		glm::vec4* RESTRICT pos = p->m_pos;
 
 		const size_t endId = p->m_countAlive;
 		glm::vec4 off = glm::vec4(0.0f);
