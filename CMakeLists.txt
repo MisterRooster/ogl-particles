@@ -182,14 +182,17 @@ endif()
 
 # Copy runtime assets next to the executable, which is where FileSystem::getModuleDirectory() looks
 # for them. Not Windows only: without these the app builds but has no shaders or sprites to load.
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+# This is its own target rather than a POST_BUILD step on the executable, because POST_BUILD only
+# runs when the exe relinks: editing a shader on its own left a stale copy deployed.
+add_custom_target(copy_assets ALL
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	"${PROJECT_SOURCE_DIR}/data"
-	"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data")
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		"${PROJECT_SOURCE_DIR}/data"
+		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data"
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	"${PROJECT_SOURCE_DIR}/src/shaders"
-	"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data/shaders")
+		"${PROJECT_SOURCE_DIR}/src/shaders"
+		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data/shaders"
+	COMMENT "Copying runtime assets")
+add_dependencies(copy_assets ${PROJECT_NAME})
 
 # Install executable to the bin directory
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
