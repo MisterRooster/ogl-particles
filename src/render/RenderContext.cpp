@@ -193,7 +193,7 @@ namespace nhahn
 
 	bool GLContext::init(Window* window)
 	{
-		__super::init(window);
+		RenderContext::init(window);
 		glfwSetErrorCallback(error_callback);
 
 		// initialize glfw
@@ -290,7 +290,7 @@ namespace nhahn
 
 	bool UIContext::init(Window* window)
 	{
-		__super::init(window);
+		RenderContext::init(window);
 
 		// GL 3.0 + GLSL 440
 		const char* glsl_version = "#version 440";

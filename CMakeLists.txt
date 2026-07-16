@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.0)
+cmake_minimum_required(VERSION 3.15.0)
 project(ogl-particles)
 
 # Set CXX standard
@@ -32,11 +32,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 # Target
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_UNICODE /DUNICODE")
-add_link_options(
-	$<$<CONFIG:DEBUG>:/SUBSYSTEM:CONSOLE>
-	$<$<NOT:$<CONFIG:DEBUG>>:/SUBSYSTEM:WINDOWS>
-	$<$<NOT:$<CONFIG:DEBUG>>:/ENTRY:mainCRTStartup>)
+add_compile_definitions(_UNICODE UNICODE)
+if (MSVC)
+	add_link_options(
+		$<$<CONFIG:DEBUG>:/SUBSYSTEM:CONSOLE>
+		$<$<NOT:$<CONFIG:DEBUG>>:/SUBSYSTEM:WINDOWS>
+		$<$<NOT:$<CONFIG:DEBUG>>:/ENTRY:mainCRTStartup>)
+elseif (WIN32)
+	add_link_options($<$<NOT:$<CONFIG:DEBUG>>:-mwindows>)
+endif()
 add_executable(${PROJECT_NAME} ${APP_HEADER_FILES} ${APP_SOURCE_FILES})
 
 # Preprocessor defines
@@ -121,7 +125,7 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 set(APP_LIBS glfw ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
 if(WIN32)
-	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib")
+	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib" "Xinput.lib")
 endif()
 
 # Define the include DIRs

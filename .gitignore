@@ -117,6 +117,11 @@ ipch/
 # Local History for Visual Studio
 .localhistory/
 
+#----------------- CMake user files ------------------
+
+CMakeUserPresets.json
+out/
+
 #----------------- C++ stuff ------------------
 
 # Prerequisites
