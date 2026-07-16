@@ -96,6 +96,11 @@ namespace nhahn
 
 	Texture::~Texture()
 	{
+		// Remove ourselves from the static texture-unit cache, otherwise a later
+		// bind() to the same unit would dereference this freed object (dangling pointer).
+		if (_boundUnit != -1 && _units[_boundUnit] == this)
+			_units[_boundUnit] = nullptr;
+			
 		if (_glName)
 		{
 			_memoryUsage -= size();
