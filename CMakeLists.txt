@@ -44,17 +44,25 @@ endif()
 add_executable(${PROJECT_NAME} ${APP_HEADER_FILES} ${APP_SOURCE_FILES})
 
 # Preprocessor defines
+# These are not platform specific and must apply everywhere: GLEW is linked static, and dropping
+# IMGUI_USER_CONFIG would silently build ImGui without this project's configuration.
+target_compile_definitions(
+	${PROJECT_NAME} PRIVATE
+	GLEW_STATIC
+	# customize ImGui implementation
+	IMGUI_USER_CONFIG="thirdparty/oglp_imgui_config.h")
+
 if (WIN32)
 	target_compile_definitions(
-		${PROJECT_NAME} PRIVATE   
-		# Prevents Windows.h from adding unnecessary includes    
-		WIN32_LEAN_AND_MEAN  
-		# Prevents Windows.h from defining min/max as macros 
-		NOMINMAX
-		_CRT_SECURE_NO_WARNINGS
-		GLEW_STATIC
-		# customize ImGui implementation
-		IMGUI_USER_CONFIG="thirdparty/oglp_imgui_config.h")   
+		${PROJECT_NAME} PRIVATE
+		# Prevents Windows.h from adding unnecessary includes
+		WIN32_LEAN_AND_MEAN
+		# Prevents Windows.h from defining min/max as macros
+		NOMINMAX)
+endif()
+
+if (MSVC)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Compiler flags
@@ -171,17 +179,16 @@ if(MSVC_IDE)
 	GroupSources(src)
 endif()
 
-# Copy dlls and shaders
-if(WIN32)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${PROJECT_SOURCE_DIR}/data"
-		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data")
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${PROJECT_SOURCE_DIR}/src/shaders"
-		"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data/shaders")
-endif()
+# Copy runtime assets next to the executable, which is where FileSystem::getModuleDirectory() looks
+# for them. Not Windows only: without these the app builds but has no shaders or sprites to load.
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	"${PROJECT_SOURCE_DIR}/data"
+	"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	"${PROJECT_SOURCE_DIR}/src/shaders"
+	"$<TARGET_FILE_DIR:${PROJECT_NAME}>/data/shaders")
 
 # Install executable to the bin directory
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
