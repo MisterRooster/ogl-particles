@@ -121,10 +121,15 @@ namespace nhahn
 	{
 		char fullPreamble[1024], fullV[1024], fullG[1024], fullF[1024];
 
-		sprintf(fullPreamble, "%s%s", path, includeFile);
-		sprintf(fullV, "%s%s", path, v);
-		sprintf(fullG, "%s%s", path, g);
-		sprintf(fullF, "%s%s", path, f);
+		// each stage is optional; only build the path for the ones actually supplied
+		if (includeFile)
+			sprintf(fullPreamble, "%s%s", path, includeFile);
+		if (v)
+			sprintf(fullV, "%s%s", path, v);
+		if (g)
+			sprintf(fullG, "%s%s", path, g);
+		if (f)
+			sprintf(fullF, "%s%s", path, f);
 
 		ShaderObject* vert, * frag, * geom;
 		if (f)
