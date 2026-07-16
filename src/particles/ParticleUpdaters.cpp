@@ -74,7 +74,9 @@ namespace nhahn
 		__m256 ldt = _mm256_set1_ps(localDT);
 		size_t i;
 
-		for (i = 0; i < endId; i += 2)
+		// each __m256 step covers two vec4s, so stop at endId-1 and let the scalar tail below
+		// handle a trailing odd element instead of running one past the last particle
+		for (i = 0; i + 1 < endId; i += 2)
 		{
 			pa = (__m256*)(&acc[i].x);
 			*pa = _mm256_add_ps(*pa, ga);
@@ -84,7 +86,7 @@ namespace nhahn
 			acc[i] += globalA;
 		}
 
-		for (i = 0; i < endId; i += 2)
+		for (i = 0; i + 1 < endId; i += 2)
 		{
 			pa = (__m256*)(&vel[i].x);
 			pb = (__m256*)(&acc[i].x);
@@ -96,7 +98,7 @@ namespace nhahn
 			vel[i] += localDT * acc[i];
 		}
 
-		for (size_t i = 0; i < endId; i += 2)
+		for (i = 0; i + 1 < endId; i += 2)
 		{
 			pa = (__m256*)(&pos[i].x);
 			pb = (__m256*)(&vel[i].x);
