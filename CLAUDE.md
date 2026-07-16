@@ -114,3 +114,8 @@ life, `.y` max life, `.z` normalized age 0→1, `.w` `1/maxLife`.
   `cpuUpdate` (solve) → `gpuUpdate` (VBO upload) → `render` (`glDrawArrays(GL_POINTS, ...)`).
 - `main.cpp`'s `render()` runs **inside an already-open ImGui frame** — `Window::preRender`/
   `postRender` bracket it, so call ImGui directly and never start a frame yourself.
+
+## Commits
+
+- Do not add a co-author text to the commits.
+- Style: Descriptive commit sentence, details as bullet list points
