@@ -40,7 +40,6 @@ namespace nhahn
 			ImGui::Begin("MainDockspaceWindow");
 
 			ImGuiID dockSpaceId = ImGui::GetID("MainDockspace");
-			ImGuiID dockspace_id_copy = dockSpaceId;
 
 			ImGui::DockBuilderRemoveNode(dockSpaceId); // clear any previous layout
 			ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);

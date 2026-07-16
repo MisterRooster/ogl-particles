@@ -22,8 +22,6 @@
 #define RAND_FAST 2
 #define RAND_MODE RAND_FAST
 
-static int RandSeed = 1;
-
 
 namespace nhahn
 {

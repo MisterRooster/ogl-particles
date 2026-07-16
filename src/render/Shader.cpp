@@ -86,7 +86,7 @@ namespace nhahn
 			glGetShaderSource(obj, src_length, NULL, src);
 
 			DBG("shader", DebugLevel::WARNING, "---------------------------\n");
-			int line = 1;
+			[[maybe_unused]] int line = 1;   // only read by DBG, which is compiled out in release
 			GLchar* src2 = src;
 			for (int i = 0; i < src_length; i++, src2++) {
 				if (*src2 == '\n') {

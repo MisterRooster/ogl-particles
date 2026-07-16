@@ -184,7 +184,7 @@ namespace nhahn
 		int height = windowRect.bottom - windowRect.top;
 
 		original_proc = (WNDPROC)GetWindowLongPtr(hWnd, GWLP_WNDPROC);
-		(WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc));
+		SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc));
 		SetWindowPos(hWnd, NULL, 0, 0, width, height, SWP_FRAMECHANGED | SWP_NOMOVE);
 	}
 #endif // _WIN32
@@ -346,7 +346,7 @@ namespace nhahn
 		// load logo image
 		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
 		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
-		ASSERT(_logo_id, "Failed to create logo texture!");
+		ASSERT(ret && _logo_id, "Failed to create logo texture!");
 
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return true;
