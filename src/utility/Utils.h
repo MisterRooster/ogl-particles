@@ -17,6 +17,9 @@ namespace nhahn
 	public:
 		static constexpr float PI = 3.1415936f;
 
+		/** True if the running CPU supports AVX, which the particle updaters require. */
+		static bool cpuSupportsAVX();
+
 		static float Fast_RandFloat();
 
 		static float sfrand();

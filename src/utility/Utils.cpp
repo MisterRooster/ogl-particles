@@ -10,9 +10,34 @@
 #include <stdint.h>
 #include <algorithm>
 
+#if defined(_MSC_VER)
+#	include <intrin.h>
+#endif
+
 
 namespace nhahn
 {
+	bool Utils::cpuSupportsAVX()
+	{
+	#if defined(_MSC_VER)
+		// CPUID leaf 1: ECX bit 28 = AVX, bit 27 = OSXSAVE. AVX state must also be enabled by the
+		// OS, which is what the XCR0 check below confirms.
+		int regs[4] = {};
+		__cpuid(regs, 1);
+
+		const bool avx = (regs[2] & (1 << 28)) != 0;
+		const bool osxsave = (regs[2] & (1 << 27)) != 0;
+		if (!avx || !osxsave)
+			return false;
+
+		// XCR0 bits 1 (SSE) and 2 (YMM) must both be set for the OS to preserve AVX registers
+		return (_xgetbv(0) & 0x6) == 0x6;
+	#else
+		__builtin_cpu_init();
+		return __builtin_cpu_supports("avx");
+	#endif
+	}
+
 	// http://www.musicdsp.org/showone.php?id=273
 	// fast rand float, using full 32bit precision
 	// takes about 12 seconds for 2 billion calls

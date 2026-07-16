@@ -80,6 +80,14 @@ int main()
 {
 	using namespace nhahn;
 
+	// The particle updaters are compiled with AVX unconditionally. Report that up front rather than
+	// letting the first update crash with an illegal instruction.
+	if (!Utils::cpuSupportsAVX())
+	{
+		printf("This CPU does not support AVX, which is required to run the particle updaters.\n");
+		return EXIT_FAILURE;
+	}
+
 	{
 		Application app("Roosters OpenGL Particle System", true);
 		app.setRenderCallback(render, renderTickrate);
