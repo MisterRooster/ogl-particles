@@ -8,6 +8,7 @@
 #include "Utils.h"
 
 #include <stdint.h>
+#include <string.h>
 #include <algorithm>
 
 #if defined(_MSC_VER)
@@ -63,10 +64,15 @@ namespace nhahn
 	static unsigned int mirand = 1;
 	float Utils::sfrand()
 	{
-		unsigned int a;
 		mirand *= 16807;
-		a = (mirand & 0x007fffff) | 0x40000000;
-		return(*((float*)&a) - 3.0f);
+		unsigned int a = (mirand & 0x007fffff) | 0x40000000;
+
+		// memcpy is the defined way to reinterpret the bits: reading an unsigned int through a
+		// float* breaks strict aliasing, and optimised builds were free to treat the value as
+		// uninitialised. Compilers fold this back to a plain register move.
+		float f;
+		memcpy(&f, &a, sizeof(f));
+		return f - 3.0f;
 	}
 
 	int Utils::irand()
@@ -154,7 +160,7 @@ namespace nhahn
 	std::string Utils::hexToAscii(std::string sHex)
 	{
 		std::ostringstream os;
-		for (int i = 0; i < sHex.length(); i += 2)
+		for (size_t i = 0; i < sHex.length(); i += 2)
 		{
 			std::string hex = sHex.substr(i, 2);
 			os << std::dec << (char)std::stoul(hex, nullptr, 16);
