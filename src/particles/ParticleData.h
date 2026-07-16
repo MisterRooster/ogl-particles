@@ -7,6 +7,7 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
+#include <new>
 #include "utility/Types.h"
 
 #ifndef GLM_FORCE_INTRINSICS
@@ -19,6 +20,10 @@ namespace nhahn
     class ParticleData
     {
     public:
+        /** Alignment of the particle arrays. Must cover the widest SIMD access in ParticleUpdaters
+            (currently __m256 = 32 bytes), or the aligned AVX loads there fault. */
+        static constexpr std::align_val_t ALIGNMENT{ 32 };
+
         ParticleData() { }
         explicit ParticleData(size_t maxCount) { generate(maxCount); }
         ~ParticleData();
