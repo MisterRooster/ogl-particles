@@ -125,7 +125,7 @@ add_subdirectory( ${PROJECT_SOURCE_DIR}/dependencies/glm )
 set(APP_LIBS glfw ${OPENGL_LIBRARY} libglew_static glm::glm ${CMAKE_DL_LIBS})
 
 if(WIN32)
-	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib" "Xinput.lib")
+	set(APP_LIBS ${APP_LIBS} "Dwmapi.lib" "Xinput9_1_0.lib")
 endif()
 
 # Define the include DIRs
