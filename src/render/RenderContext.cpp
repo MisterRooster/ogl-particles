@@ -228,9 +228,9 @@ namespace nhahn
 		glfwSetWindowCloseCallback(gl_Window, on_window_close_callback);
 
 		// application icons
-		std::string icon32_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
-		std::string icon64_path = FileSystem::getModuleDirectory() + "data\\icons\\logo64.png";
-		std::string icon96_path = FileSystem::getModuleDirectory() + "data\\icons\\logo96.png";
+		std::string icon32_path = FileSystem::getModuleDirectory() + "data/icons/logo32.png";
+		std::string icon64_path = FileSystem::getModuleDirectory() + "data/icons/logo64.png";
+		std::string icon96_path = FileSystem::getModuleDirectory() + "data/icons/logo96.png";
 
 		GLFWimage icons[3];
 		int i32_ch, i64_ch, i96_ch;
@@ -325,8 +325,8 @@ namespace nhahn
 		}
 
 		// load custom font
-		std::string df_path = FileSystem::getModuleDirectory() + "data\\fonts\\Ubuntu-Regular.ttf";
-		std::string if_path = FileSystem::getModuleDirectory() + "data\\fonts\\MaterialDesignIconsDesktop.ttf";
+		std::string df_path = FileSystem::getModuleDirectory() + "data/fonts/Ubuntu-Regular.ttf";
+		std::string if_path = FileSystem::getModuleDirectory() + "data/fonts/MaterialDesignIconsDesktop.ttf";
 
 		float base_font_size = 13.0f;
 		ImFontConfig df_config;
@@ -344,7 +344,7 @@ namespace nhahn
 		io.Fonts->AddFontFromFileTTF(if_path.c_str(), icon_font_size, &icons_config, icons_ranges);
 
 		// load logo image
-		std::string logo_path = FileSystem::getModuleDirectory() + "data\\icons\\logo32.png";
+		std::string logo_path = FileSystem::getModuleDirectory() + "data/icons/logo32.png";
 		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
 		ASSERT(ret && _logo_id, "Failed to create logo texture!");
 
