@@ -13,9 +13,6 @@
 
 namespace nhahn
 {
-#	define M_PI 3.1415936f
-
-
 	class ParticleGenerator
 	{
 	public:
