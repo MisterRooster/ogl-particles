@@ -31,7 +31,6 @@ namespace nhahn
 		Application(const std::string& appname, bool customTitlebar = false);
 		~Application();
 
-		static Application& instance() { return *_sInstance; }
 		Window* getWindow() const { return _mainWindow.get(); }
 
 		void setRenderCallback(std::function<void(double)> func, double tickrate = 0.0);
@@ -40,8 +39,6 @@ namespace nhahn
 		void run();
 
 	private:
-		static Application* _sInstance;
-
 		std::shared_ptr<Window> _mainWindow;
 		double _dt;
 
