@@ -88,7 +88,7 @@ namespace nhahn
 	        case WM_NCCALCSIZE:
 	        {
 	            // Remove the window's standard sizing border
-	            if (wParam == TRUE && lParam != NULL)
+	            if (wParam == TRUE && lParam != 0)
 	            {
 					if (!IsMaximized(hWnd))
 					{
