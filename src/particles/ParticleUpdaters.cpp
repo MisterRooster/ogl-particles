@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <glm/common.hpp>
 #include <glm/gtc/random.hpp>
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #define SSE_MODE_NONE 0
 #define SSE_MODE_SSE2 1
@@ -173,9 +173,8 @@ namespace nhahn
 
 		const size_t endId = p->m_countAlive;
 		glm::vec4 off = glm::vec4(0.0f);
-	#if SSE_MODE == SSE_MODE_NONE
 		float dist;
-	#elif SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
+	#if SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
 		__m128 tempDist;
 	#endif
 
@@ -192,8 +191,8 @@ namespace nhahn
 		#elif SSE_MODE == SSE_MODE_SSE2 || SSE_MODE == SSE_MODE_AVX
 				off = attr[a] - p->m_pos[i];
 				tempDist = _mm_dp_ps(*(__m128*)(&off.data), *(__m128*)(&off.data), 0x71);
-				tempDist.m128_f32[0] = attr[a].w / tempDist.m128_f32[0];// *inverse2(fabs(tempDist.m128_f32[0]);
-				p->m_acc[i] += off * tempDist.m128_f32[0];
+				dist = attr[a].w / _mm_cvtss_f32(tempDist);
+				p->m_acc[i] += off * dist;
 		#endif
 			}
 		}

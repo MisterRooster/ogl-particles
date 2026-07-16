@@ -66,6 +66,17 @@ endif()
 #	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wformat -Wcast-align)
 #endif()
 
+# SIMD flags
+# ParticleUpdaters.cpp is the only translation unit using AVX/SSE4.1 intrinsics, so the arch flag is
+# scoped to it. This keeps the rest of the app baseline x86-64.
+if (MSVC)
+	set(APP_SIMD_FLAGS /arch:AVX)
+else()
+	set(APP_SIMD_FLAGS -mavx)
+endif()
+set_source_files_properties(${CMAKE_SOURCE_DIR}/src/particles/ParticleUpdaters.cpp
+	PROPERTIES COMPILE_OPTIONS "${APP_SIMD_FLAGS}")
+
 #######################################
 # External libraries
 #######################################
