@@ -33,7 +33,7 @@ namespace ImGui
 		SetCursorScreenPos(ImVec2(last_crs.x + padding.x, last_crs.y + padding.y));
 		TextColored(col, str);
 		SetCursorScreenPos(last_crs);
-		InvisibleButton("##padded-text", elem_sz);
+		Dummy(elem_sz);
 	}
 
 	void PaddedImage(ImTextureID tex, ImVec2 size, ImVec2 padding, ImVec2 uv0, ImVec2 uv1,
@@ -45,6 +45,6 @@ namespace ImGui
 		SetCursorScreenPos(ImVec2(last_crs.x + padding.x, last_crs.y + padding.y));
 		ImGui::Image(tex, size, uv0, uv1, tint_col, border_col);
 		SetCursorScreenPos(last_crs);
-		InvisibleButton("##padded-text", elem_sz);
+		Dummy(elem_sz);
 	}
 }
