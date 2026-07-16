@@ -7,6 +7,7 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "SceneView.h"
 
+#include <cstdlib>
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -99,7 +100,8 @@ namespace nhahn
         _particleTex->setFormat(TEXEL_FLOAT, 4, 1);
         _particleTex->init();
         _particleTex->copy(textureData);
-        delete[] textureData;
+        // loadImageFile() returns stb_image memory, which must be released with free()
+        free(textureData);
 
         _currentEffect = nullptr;
 
